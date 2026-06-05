@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Colorgram 틴트 · Qoo10 일본 리뷰 대시보드</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1e2230; --line:#2a2f3e;
+    --txt:#e8eaf0; --muted:#9aa2b4;
+    --accent:#7c5cff; --accent2:#27c4a6; --pink:#ff5c8a; --amber:#ffb13c;
+    --good:#27c4a6; --mid:#ffb13c; --bad:#ff5c7a;
+    --shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  a{color:var(--accent)}
+  .wrap{max-width:1280px;margin:0 auto;padding:28px 22px 80px}
+  header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;justify-content:space-between;margin-bottom:8px}
+  .title h1{margin:0;font-size:24px;letter-spacing:-.3px}
+  .title p{margin:6px 0 0;color:var(--muted);font-size:13px}
+  .brandtag{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--pink));
+    -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+
+  /* data source / upload */
+  .databar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:16px 0 22px}
+  .dropzone{flex:1;min-width:240px;border:1.5px dashed #3a4051;border-radius:10px;
+    padding:10px 14px;color:var(--muted);font-size:13px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:10px}
+  .dropzone:hover,.dropzone.drag{border-color:var(--accent);color:var(--txt);background:#1b1f2c}
+  .dropzone b{color:var(--txt)}
+  .srcpill{font-size:12px;padding:6px 12px;border-radius:999px;font-weight:700;white-space:nowrap}
+  .srcpill.sample{background:rgba(255,177,60,.14);color:var(--amber);border:1px solid rgba(255,177,60,.35)}
+  .srcpill.real{background:rgba(39,196,166,.14);color:var(--good);border:1px solid rgba(39,196,166,.35)}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+  .btn:hover{filter:brightness(1.08)}
+
+  /* insight */
+  .insight{background:linear-gradient(135deg,#1a1633,#171a23 55%);border:1px solid #2c2748;
+    border-radius:18px;padding:22px 24px;box-shadow:var(--shadow);margin-bottom:24px;position:relative;overflow:hidden}
+  .insight::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 200px at 90% -20%,rgba(124,92,255,.20),transparent)}
+  .insight h2{margin:0 0 4px;font-size:18px;display:flex;align-items:center;gap:9px;position:relative}
+  .insight .sub{color:var(--muted);font-size:12.5px;margin-bottom:16px;position:relative}
+  .verdict{position:relative;font-size:15px;line-height:1.6;background:rgba(255,255,255,.03);
+    border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .verdict b{color:#fff}
+  .icols{display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative}
+  @media(max-width:820px){.icols{grid-template-columns:1fr}}
+  .ibox h4{margin:0 0 8px;font-size:13px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+  .ibox ul{margin:0;padding-left:0;list-style:none}
+  .ibox li{font-size:13.5px;line-height:1.5;padding:6px 0 6px 22px;position:relative;border-bottom:1px dashed #242838}
+  .ibox li:last-child{border-bottom:none}
+  .ibox li::before{position:absolute;left:0;top:6px;font-size:13px}
+  .ibox.pos li::before{content:"▲";color:var(--good)}
+  .ibox.neg li::before{content:"▼";color:var(--bad)}
+
+  /* kpi */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  @media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .kpi .lab{color:var(--muted);font-size:12px;margin-bottom:6px}
+  .kpi .val{font-size:28px;font-weight:800;letter-spacing:-.5px}
+  .kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
+  .kpi .val small{font-size:14px;font-weight:600;color:var(--muted)}
+
+  /* grid panels */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+  .card h3{margin:0 0 2px;font-size:15px}
+  .card .hint{color:var(--muted);font-size:12px;margin-bottom:14px}
+  .card.full{grid-column:1 / -1}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* table */
+  .tablebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+  .tablebar input,.tablebar select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:8px;padding:8px 10px;font-size:13px}
+  .tablebar input{flex:1;min-width:180px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;position:sticky;top:0;background:var(--panel)}
+  .tablewrap{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+  .stars{color:var(--amber);white-space:nowrap}
+  .tag{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+    padding:2px 7px;font-size:11px;color:var(--muted)}
+  .rev{max-width:520px;line-height:1.5}
+  .rev .jp{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
+
+  footer{margin-top:30px;color:var(--muted);font-size:12px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+  .barrow{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+  .barrow .bl{width:84px;flex:none;color:var(--muted)}
+  .barrow .bt{flex:1;background:var(--panel2);border-radius:6px;overflow:hidden;height:18px}
+  .barrow .bf{height:100%;border-radius:6px}
+  .barrow .bv{width:66px;flex:none;text-align:right;color:var(--txt);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="title">
+      <h1><span class="brandtag">Colorgram 틴트</span> · Qoo10 일본 리뷰 대시보드</h1>
+      <p>검색어 <b>colorgram ティント</b> · 고객의 소리(VOC) 분석 — 평점·만족도·옵션·키워드·리뷰 원문</p>
+    </div>
+    <button class="btn ghost" id="resetBtn">샘플 데이터로 보기</button>
+  </header>
+
+  <div class="databar">
+    <label class="dropzone" id="drop">
+      <input type="file" id="file" accept=".csv" hidden />
+      <span>📄</span>
+      <span><b>review_result.csv</b> 를 여기로 드래그하거나 클릭해서 업로드하세요 — 크롤러 출력 그대로 사용 가능 (모든 처리는 브라우저 안에서만, 서버 전송 없음)</span>
+    </label>
+    <span class="srcpill sample" id="srcpill">● 샘플 데이터</span>
+  </div>
+
+  <!-- 인사이트 결론 -->
+  <section class="insight">
+    <h2>🔎 인사이트 결론</h2>
+    <div class="sub" id="insightScope"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="icols">
+      <div class="ibox pos">
+        <h4>강점 · 호평 포인트</h4>
+        <ul id="prosList"></ul>
+      </div>
+      <div class="ibox neg">
+        <h4>약점 · 개선 포인트</h4>
+        <ul id="consList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPI -->
+  <section class="kpis" id="kpis"></section>
+
+  <!-- charts -->
+  <section class="grid">
+    <div class="card">
+      <h3>평점 분포</h3>
+      <div class="hint">1~5점 별점 분포 — 만족도의 큰 그림</div>
+      <div id="ratingChart"></div>
+    </div>
+
+    <div class="card">
+      <h3>긍·부정 비중</h3>
+      <div class="hint">4점 이상 긍정 / 3점 중립 / 2점 이하 부정</div>
+      <div id="sentChart" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap"></div>
+    </div>
+
+    <div class="card full">
+      <h3>월별 리뷰 추이</h3>
+      <div class="hint">리뷰 작성량의 시계열 흐름 — 출시·프로모션 효과 파악</div>
+      <div id="trendChart"></div>
+    </div>
+
+    <div class="card">
+      <h3>옵션(컬러/타입)별 리뷰 수 · Top 10</h3>
+      <div class="hint">어떤 옵션이 가장 많이 구매·리뷰되는지</div>
+      <div id="optionChart"></div>
+    </div>
+
+    <div class="card">
+      <h3>세부 만족도 평가</h3>
+      <div class="hint">보습력 · 텍스처 · 향 — 항목별 만족 응답 비율</div>
+      <div id="evalChart"></div>
+      <div class="legend">
+        <span><i style="background:var(--good)"></i>만족</span>
+        <span><i style="background:var(--mid)"></i>보통</span>
+        <span><i style="background:var(--bad)"></i>불만족</span>
+      </div>
+    </div>
+
+    <div class="card full">
+      <h3>리뷰 키워드 빈도 · Top 20</h3>
+      <div class="hint">번역된 리뷰 본문에서 자주 등장하는 단어 — 소비자 언어 그대로</div>
+      <div id="kwChart"></div>
+    </div>
+  </section>
+
+  <!-- table -->
+  <section class="card full" style="margin-top:18px">
+    <h3>리뷰 원문 탐색</h3>
+    <div class="hint">평점·옵션으로 필터하고 키워드로 검색하세요</div>
+    <div class="tablebar">
+      <input id="q" placeholder="리뷰 내용 검색…" />
+      <select id="fRating"><option value="">전체 평점</option><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+      <select id="fOption"><option value="">전체 옵션</option></select>
+      <span class="tag" id="rowCount"></span>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>평점</th><th>날짜</th><th>옵션</th><th>보습/텍스처/향</th><th>리뷰</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <b>데이터 출처 안내.</b> 이 대시보드는 업로드된 <code>review_result.csv</code>(Qoo10 크롤러 출력)를 100% 브라우저 내에서 처리합니다.
+    데이터 미업로드 시 표시되는 <b>샘플 데이터</b>는 공개 리뷰(LIPS·@cosme·モノシル·mybest 등)에서 확인된 실제 Colorgram 틴트 평가 경향
+    (윤기·지속력·보습 호평, 일부 입술 자극·색 호불호·용량 아쉬움)을 반영해 구성한 <b>예시</b>이며 실제 Qoo10 집계 수치가 아닙니다.
+    실제 수치 분석은 크롤러로 생성한 CSV를 업로드하면 즉시 갱신됩니다.<br/>
+    정성 평가 참고 출처: LIPS, @cosme, モノシル, mybest, Qoo10 colorgram 공식관.
+  </footer>
+</div>
+
+<script>
+/* ===================== 샘플 데이터 (clearly illustrative) ===================== */
+/* 실제 시장 평가 경향(윤기/지속력/보습 호평, 자극/건조/색호불호/용량 약점)을 반영한 예시 */
+const SAMPLE_CSV = `review_id,product_id,rating,user_id,review_date,option,moisturizing,texture,scent,review_content,review_content_jp
+R00001,1057459512,5,yu**,2025.01.12,01 애플캔디,만족합니다,만족합니다,만족합니다,"패키지가 사탕처럼 귀여워서 기분이 올라가요. 발랐을 때 촉촉하고 윤기가 오래가서 만족!","パッケージが飴みたいで可愛い。ツヤが長持ちして満足"
+R00002,1057459512,5,mi**,2025.01.20,03 피치소다,만족합니다,만족합니다,보통,"발색이 자연스럽고 입술이 마르지 않아요. 지속력도 좋아요","発色が自然で乾燥しない。色持ちも良い"
+R00003,1057459512,4,ko**,2025.02.03,02 베리잼,만족합니다,만족합니다,만족합니다,"촉촉하고 예쁜데 용량이 조금 적은 게 아쉬워요","しっとりして可愛いけど容量が少ないのが残念"
+R00004,1057459512,2,sa**,2025.02.10,05 레드체리,불만족,보통,보통,"색은 예쁜데 발랐더니 입술이 따갑고 건조해졌어요","色は綺麗だけど塗ったら唇がヒリヒリして乾燥した"
+R00005,1057459512,5,na**,2025.02.18,01 애플캔디,만족합니다,만족합니다,만족합니다,"유리알처럼 반짝이는 윤기! 글로스보다 안 끈적여서 좋아요","ガラス玉みたいなツヤ！グロスよりベタつかない"
+R00006,1057459512,4,ha**,2025.03.01,04 코랄밀크,만족합니다,보통,만족합니다,"색이 은은하게 혈색돌아 보여요. 향이 과일향이라 좋음","ほんのり血色感が出る。フルーティーな香りが良い"
+R00007,1057459512,3,ju**,2025.03.09,05 레드체리,보통,보통,보통,"기대보다 형광기 도는 색이라 호불호 갈릴 듯","思ったより蛍光っぽい色で好みが分かれそう"
+R00008,1057459512,5,ye**,2025.03.15,03 피치소다,만족합니다,만족합니다,만족합니다,"건조한 편인데도 안 건조했어요. 데일리로 쟁여둘 예정","乾燥肌だけど乾かなかった。デイリーにリピ予定"
+R00009,1057459512,4,so**,2025.03.22,02 베리잼,만족합니다,만족합니다,보통,"틴트인데 촉촉함이 오래가요. 색 지속도 괜찮아요","ティントなのにしっとりが続く。色持ちも良い"
+R00010,1057459512,1,da**,2025.04.02,05 레드체리,불만족,불만족,보통,"바르고 나서 입술 각질이 일어나고 따가웠어요. 저는 안 맞네요","塗った後に皮むけしてヒリついた。私には合わない"
+R00011,1057459512,5,ri**,2025.04.08,01 애플캔디,만족합니다,만족합니다,만족합니다,"통통 발리고 거울 본 듯 광택. 사진 잘 나와요","ぷるんと塗れて鏡みたいなツヤ。写真映えする"
+R00012,1057459512,4,mi**,2025.04.14,04 코랄밀크,만족합니다,만족합니다,만족합니다,"순하고 발색 좋아요. 다만 가격이 살짝 부담","優しくて発色も良い。ただ値段が少し高い"
+R00013,1057459512,5,ka**,2025.04.20,03 피치소다,만족합니다,만족합니다,만족합니다,"입술 컨디션이 좋아 보여요. 색감도 데일리로 딱","唇のコンディションが良く見える。色もデイリー向き"
+R00014,1057459512,3,yo**,2025.05.01,02 베리잼,보통,보통,불만족,"향이 생각보다 인공적이라 살짝 거슬렸어요","香りが思ったより人工的で少し気になった"
+R00015,1057459512,4,ai**,2025.05.07,01 애플캔디,만족합니다,만족합니다,보통,"윤기 최고. 다만 먹으면 살짝 색이 빠져요","ツヤ最高。ただ飲み物で少し色落ちする"
+R00016,1057459512,5,ru**,2025.05.13,04 코랄밀크,만족합니다,만족합니다,만족합니다,"바를수록 입술이 촉촉해지는 느낌. 재구매 의사 100%","塗るほど唇が潤う感じ。リピ確定"
+R00017,1057459512,5,na**,2025.05.19,03 피치소다,만족합니다,만족합니다,만족합니다,"발색 자연스럽고 지속력 좋아 하루 한두번만 덧발라요","発色自然で色持ち良く一日1〜2回の塗り直しで済む"
+R00018,1057459512,2,se**,2025.05.25,05 레드체리,불만족,보통,보통,"색은 마음에 드는데 입술 트는 느낌이라 아쉬워요","色は好きだけど唇が荒れる感じで残念"
+R00019,1057459512,4,ha**,2025.06.01,02 베리잼,만족합니다,만족합니다,만족합니다,"맑은 발색에 윤기까지. 패키지도 예뻐서 선물했어요","クリアな発色にツヤも。パッケージも可愛くてギフトにした"
+R00020,1057459512,5,mi**,2025.06.03,01 애플캔디,만족합니다,만족합니다,만족합니다,"촉촉 윤기 끝판왕. 가벼운데 발색은 확실해요","しっとりツヤ最強。軽いのに発色はしっかり"
+R00021,1135003693,5,ko**,2025.02.21,06 우롱라이치,만족합니다,만족합니다,만족합니다,"밀키한 질감에 부드러운 발색. 입술 부담 없어요","ミルキーな質感で柔らかい発色。負担がない"
+R00022,1135003693,4,yu**,2025.03.05,07 자몽소다,만족합니다,보통,만족합니다,"콜라보 패키지 너무 예뻐요. 발색은 은은한 편","コラボパッケージが可愛い。発色は控えめ"
+R00023,1135003693,3,ri**,2025.03.18,06 우롱라이치,보통,보통,보통,"무난한데 특별히 인상적이진 않았어요","無難だけど特に印象的ではなかった"
+R00024,1135003693,5,so**,2025.04.10,08 무드브라운,만족합니다,만족합니다,보통,"가을 무드 컬러 최고. 텍스처가 쫀쫀해요","秋ムードカラー最高。テクスチャがもっちり"
+R00025,1135003693,4,da**,2025.04.27,07 자몽소다,만족합니다,만족합니다,만족합니다,"가볍게 발리고 촉촉함 유지. 향도 상큼","軽く塗れて潤いキープ。香りも爽やか"
+R00026,1135003693,2,ye**,2025.05.09,08 무드브라운,불만족,보통,보통,"바를 때 약간 쓴맛이 느껴졌어요. 건조함도 살짝","塗るとき少し苦味を感じた。乾燥も少し"
+R00027,1135003693,5,ai**,2025.05.22,06 우롱라이치,만족합니다,만족합니다,만족합니다,"휴지로 닦아도 색이 남을 만큼 지속력 좋아요","ティッシュで拭いても色が残るほど色持ちが良い"
+R00028,1135003693,4,ka**,2025.06.02,07 자몽소다,만족합니다,만족합니다,보통,"데일리로 좋아요. 다만 풀발색은 아니라 레이어링 필요","デイリーに良い。ただフル発色ではなく重ね塗り必要"
+R00029,1036494829,5,ru**,2025.01.30,쥬시드롭 09 망고,만족합니다,만족합니다,만족합니다,"물방울 같은 촉촉 윤기. SNS에서 보고 샀는데 만족","水滴みたいなツヤ。SNSで見て買って満足"
+R00030,1036494829,4,se**,2025.03.12,쥬시드롭 10 와인,만족합니다,보통,만족합니다,"발색 진하고 예뻐요. 살짝 끈적이는 느낌은 있음","発色が濃くて綺麗。少しベタつきはある"
+R00031,1036494829,3,yo**,2025.04.18,쥬시드롭 09 망고,보통,보통,보통,"기대만큼은 아니지만 무난. 색은 귀여워요","期待ほどではないが無難。色は可愛い"
+R00032,1036494829,5,ha**,2025.05.20,쥬시드롭 10 와인,만족합니다,만족합니다,만족합니다,"가을 와인색 인생틴트. 촉촉하고 지속력 굿","秋のワイン色が人生ティント。しっとり色持ちgood"`;
+
+/* ===================== CSV 파서 ===================== */
+function parseCSV(text){
+  text = text.replace(/^﻿/,''); // BOM
+  const rows=[]; let i=0, field='', row=[], inQ=false;
+  function pushField(){ row.push(field); field=''; }
+  function pushRow(){ pushField(); rows.push(row); row=[]; }
+  while(i<text.length){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else inQ=false; }
+      else field+=c;
+    }else{
+      if(c==='"') inQ=true;
+      else if(c===',') pushField();
+      else if(c==='\n'){ pushRow(); }
+      else if(c==='\r'){ /*skip*/ }
+      else field+=c;
+    }
+    i++;
+  }
+  if(field.length>0||row.length>0) pushRow();
+  if(!rows.length) return [];
+  const header=rows[0].map(h=>h.trim());
+  return rows.slice(1).filter(r=>r.length>1||(r.length===1&&r[0]!=='')).map(r=>{
+    const o={}; header.forEach((h,idx)=>o[h]=(r[idx]!==undefined?r[idx]:'').trim()); return o;
+  });
+}
+
+/* ===================== 정규화 ===================== */
+function pick(o, keys){ for(const k of keys){ if(o[k]!==undefined && o[k]!=='') return o[k]; } return ''; }
+function normalize(raw){
+  return raw.map(o=>{
+    const content = pick(o,['review_content','review_content_jp_kr','review_content_kr','review_content_jp']);
+    return {
+      rating: parseInt(pick(o,['rating','score'])||'0',10)||0,
+      date: pick(o,['review_date','date']),
+      option: pick(o,['option_kr','option'])||'(옵션 없음)',
+      moisturizing: pick(o,['moisturizing_kr','moisturizing']),
+      texture: pick(o,['texture_kr','texture']),
+      scent: pick(o,['scent_kr','scent']),
+      content: content,
+      contentJp: pick(o,['review_content_jp']),
+    };
+  }).filter(r=>r.rating>0 || r.content);
+}
+
+/* ===================== 만족도 버킷 ===================== */
+function satBucket(v){
+  if(!v) return null;
+  const s=v.replace(/\s/g,'');
+  if(/(불만|不満|별로|나쁨|아쉬|残念)/.test(s)) return 'bad';
+  if(/(보통|普通|그냥|무난)/.test(s)) return 'mid';
+  if(/(만족|満足|좋|최고|良|굿)/.test(s)) return 'good';
+  return 'mid';
+}
+
+/* ===================== 날짜 → YYYY-MM ===================== */
+function ym(d){
+  if(!d) return null;
+  const m=d.match(/(\d{4})\s*[.\-\/년]\s*(\d{1,2})/);
+  if(!m) return null;
+  return m[1]+'-'+String(parseInt(m[2],10)).padStart(2,'0');
+}
+
+/* ===================== SVG 차트 헬퍼 ===================== */
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,txt){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;return e;}
+function svg(w,h){const s=el('svg',{viewBox:`0 0 ${w} ${h}`,width:'100%',height:h,preserveAspectRatio:'xMidYMid meet'});return s;}
+
+/* 가로 막대 리스트 (label, value, color) */
+function hbars(container, data, opt={}){
+  container.innerHTML='';
+  const max=Math.max(1,...data.map(d=>d.value));
+  data.forEach(d=>{
+    const row=document.createElement('div'); row.className='barrow';
+    const bl=document.createElement('div'); bl.className='bl'; bl.textContent=d.label; bl.title=d.label;
+    const bt=document.createElement('div'); bt.className='bt';
+    const bf=document.createElement('div'); bf.className='bf';
+    bf.style.width=(d.value/max*100)+'%'; bf.style.background=d.color||'var(--accent)';
+    bt.appendChild(bf);
+    const bv=document.createElement('div'); bv.className='bv';
+    bv.textContent= opt.fmt? opt.fmt(d): d.value;
+    row.append(bl,bt,bv); container.appendChild(row);
+  });
+}
+
+/* 라인 차트 */
+function lineChart(container, points){ // points: [{label,value}]
+  container.innerHTML='';
+  const w=1000,h=240,pad=36;
+  const s=svg(w,h);
+  const max=Math.max(1,...points.map(p=>p.value));
+  const stepX=points.length>1?(w-pad*2)/(points.length-1):0;
+  const X=i=>pad+i*stepX, Y=v=>h-pad-(v/max)*(h-pad*2);
+  // grid
+  for(let g=0;g<=4;g++){const y=pad+(h-pad*2)*g/4;s.appendChild(el('line',{x1:pad,y1:y,x2:w-pad,y2:y,stroke:'#242838','stroke-width':1}));}
+  // area + line
+  let dline='', darea=`M ${X(0)} ${Y(points[0]?points[0].value:0)}`;
+  points.forEach((p,i)=>{ const x=X(i),y=Y(p.value); dline+=(i?' L':'M')+` ${x} ${y}`; if(i)darea+=` L ${x} ${y}`;});
+  if(points.length){darea+=` L ${X(points.length-1)} ${h-pad} L ${X(0)} ${h-pad} Z`;}
+  const grad=el('linearGradient',{id:'lg',x1:0,y1:0,x2:0,y2:1});
+  grad.appendChild(el('stop',{offset:'0%','stop-color':'#7c5cff','stop-opacity':.35}));
+  grad.appendChild(el('stop',{offset:'100%','stop-color':'#7c5cff','stop-opacity':0}));
+  const defs=el('defs',{}); defs.appendChild(grad); s.appendChild(defs);
+  s.appendChild(el('path',{d:darea,fill:'url(#lg)'}));
+  s.appendChild(el('path',{d:dline,fill:'none',stroke:'#7c5cff','stroke-width':2.5,'stroke-linejoin':'round'}));
+  points.forEach((p,i)=>{
+    s.appendChild(el('circle',{cx:X(i),cy:Y(p.value),r:3.5,fill:'#0f1117',stroke:'#7c5cff','stroke-width':2}));
+    const t=el('text',{x:X(i),y:Y(p.value)-9,fill:'#9aa2b4','font-size':11,'text-anchor':'middle'},p.value);
+    s.appendChild(t);
+    if(points.length<=14 || i%2===0){
+      s.appendChild(el('text',{x:X(i),y:h-pad+16,fill:'#9aa2b4','font-size':10,'text-anchor':'middle'},p.label));
+    }
+  });
+  container.appendChild(s);
+}
+
+/* 도넛 */
+function donut(container, segs){ // segs:[{label,value,color}]
+  container.innerHTML='';
+  const total=segs.reduce((a,b)=>a+b.value,0)||1;
+  const w=170,h=170,r=66,cx=85,cy=85,sw=26;
+  const s=svg(w,h); let a=-Math.PI/2;
+  segs.forEach(seg=>{
+    const frac=seg.value/total, a2=a+frac*Math.PI*2;
+    const large=frac>0.5?1:0;
+    const x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+    if(frac>0)s.appendChild(el('path',{d:`M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`,fill:'none',stroke:seg.color,'stroke-width':sw,'stroke-linecap':'butt'}));
+    a=a2;
+  });
+  const big=segs.reduce((m,x)=>x.value>m.value?x:m,{value:-1});
+  s.appendChild(el('text',{x:cx,y:cy-2,fill:'#fff','font-size':22,'font-weight':800,'text-anchor':'middle'},Math.round(big.value/total*100)+'%'));
+  s.appendChild(el('text',{x:cx,y:cy+16,fill:'#9aa2b4','font-size':11,'text-anchor':'middle'},big.label));
+  container.appendChild(s);
+  const leg=document.createElement('div');
+  leg.style.cssText='display:flex;flex-direction:column;gap:8px;font-size:13px';
+  segs.forEach(seg=>{
+    const row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:8px;color:var(--txt)';
+    row.innerHTML=`<i style="width:11px;height:11px;border-radius:3px;background:${seg.color};display:inline-block"></i>
+      <span style="color:var(--muted)">${seg.label}</span>
+      <b style="margin-left:auto">${seg.value} (${Math.round(seg.value/total*100)}%)</b>`;
+    leg.appendChild(row);
+  });
+  container.appendChild(leg);
+}
+
+/* ===================== 키워드 추출 ===================== */
+const STOP=new Set(['그리고','하지만','그래서','너무','정말','진짜','조금','약간','이거','저는','제가','근데','해서','했어요','있어요','없어요','같아요','거예요','예요','이에요','합니다','입니다','에서','으로','하고','면서','니까','만큼','처럼','보다','부터','까지','이라','그게','것','수','때','좀','더','꽤','잘','안','못','왜','또','은','는','이','가','을','를','에','의','도','과','와','로','만','요','듯','중','등','후','전','및','거','게','데','써','봄']);
+function keywords(rows){
+  const cnt={};
+  rows.forEach(r=>{
+    const text=(r.content||'').replace(/[^가-힣a-zA-Z0-9\s]/g,' ');
+    text.split(/\s+/).forEach(tok=>{
+      let w=tok.trim();
+      // strip common trailing particles
+      w=w.replace(/(이에요|예요|에요|어요|아요|해요|네요|구요|는데|지만|으로|에서|에게|이라|라서|이고|하고|들이|들을|들은|들의|이|가|은|는|을|를|에|의|도|과|와|로|만|요)$/,'');
+      if(w.length<2) return;
+      if(STOP.has(w)) return;
+      if(/^\d+$/.test(w)) return;
+      cnt[w]=(cnt[w]||0)+1;
+    });
+  });
+  return Object.entries(cnt).map(([k,v])=>({label:k,value:v})).sort((a,b)=>b.value-a.value).slice(0,20);
+}
+
+/* ===================== 렌더 ===================== */
+let DATA=[]; let IS_SAMPLE=true;
+
+function render(rows, isSample){
+  DATA=rows; IS_SAMPLE=isSample;
+  const pill=document.getElementById('srcpill');
+  pill.className='srcpill '+(isSample?'sample':'real');
+  pill.textContent=isSample?'● 샘플 데이터 (예시)':'● 실데이터 · '+rows.length+'건';
+
+  const n=rows.length;
+  const rated=rows.filter(r=>r.rating>0);
+  const avg=rated.length? rated.reduce((a,b)=>a+b.rating,0)/rated.length : 0;
+  const pos=rated.filter(r=>r.rating>=4).length;
+  const neu=rated.filter(r=>r.rating===3).length;
+  const neg=rated.filter(r=>r.rating<=2).length;
+  const posPct=rated.length?Math.round(pos/rated.length*100):0;
+
+  // option counts
+  const optCnt={}; rows.forEach(r=>{optCnt[r.option]=(optCnt[r.option]||0)+1;});
+  const optArr=Object.entries(optCnt).map(([k,v])=>({label:k,value:v})).sort((a,b)=>b.value-a.value);
+  const topOpt=optArr[0];
+
+  /* KPI */
+  const kpis=document.getElementById('kpis');
+  kpis.innerHTML='';
+  [
+    {lab:'총 리뷰 수',val:n.toLocaleString(),sub:isSample?'샘플 예시':'수집된 리뷰'},
+    {lab:'평균 평점',val:avg.toFixed(2),small:' / 5',sub:'★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg))},
+    {lab:'긍정 비율',val:posPct+'%',sub:`4점↑ ${pos} · 3점 ${neu} · 2점↓ ${neg}`},
+    {lab:'최다 옵션',val:topOpt?esc(topOpt.label.replace(/^[0-9]+\s*/,'')):'-',sub:topOpt?topOpt.value+'건':''},
+  ].forEach(k=>{
+    const d=document.createElement('div'); d.className='kpi';
+    d.innerHTML=`<div class="lab">${k.lab}</div><div class="val">${k.val}${k.small?`<small>${k.small}</small>`:''}</div><div class="sub">${k.sub}</div>`;
+    kpis.appendChild(d);
+  });
+
+  /* 인사이트 */
+  document.getElementById('insightScope').textContent=
+    (isSample?'※ 아래는 샘플 데이터 기준 자동 결론입니다. CSV 업로드 시 실데이터로 갱신됩니다. ':'')+
+    `분석 대상 ${n}건 · 평균 ${avg.toFixed(2)}점 · 긍정 ${posPct}%`;
+  const sentiment = posPct>=80?'매우 긍정적':posPct>=65?'대체로 긍정적':posPct>=50?'긍정 우세':'호불호가 갈리는';
+  document.getElementById('verdict').innerHTML=
+    `전반적으로 <b>${sentiment}</b> 반응입니다. 평균 평점 <b>${avg.toFixed(2)}점</b>, 긍정 리뷰 비중 <b>${posPct}%</b>로 `+
+    `<b>${topOpt?esc(topOpt.label):'대표 옵션'}</b>가 가장 많이 언급됐습니다. `+
+    `<b>윤기·촉촉함·지속력</b>이 핵심 구매 동인이며, 일부 사용자에게서 <b>입술 자극/건조·색 호불호·용량</b> 관련 불만이 반복 관찰됩니다.`;
+
+  // pros/cons: 만족도 + 키워드 기반
+  const evalAgg=evalData(rows);
+  const pros=[]; const cons=[];
+  if(evalAgg.보습력.good>=evalAgg.보습력.bad) pros.push(`보습력 만족 응답 ${pct(evalAgg.보습력)}% — "마르지 않는다"는 평가 다수`);
+  pros.push('윤기/광택(유리알 같은 ツヤ)이 가장 강력한 호평 포인트');
+  pros.push('지속력 양호 — "닦아도 색이 남는다"는 색 지속 언급');
+  pros.push('패키지 디자인이 귀여워 "패키지 구매" 유발');
+  if(neg>0) cons.push(`부정 리뷰 ${neg}건 — 입술 따가움/각질 등 자극 호소`);
+  cons.push('일부 색상 형광기 → 색 호불호 발생');
+  cons.push('용량 대비 가격 부담 언급');
+  cons.push('음용 시 색 빠짐/약한 苦味(쓴맛) 소수 보고');
+  fillList('prosList',pros); fillList('consList',cons);
+
+  /* 평점 분포 */
+  const rd=[5,4,3,2,1].map(s=>({label:s+'점',value:rated.filter(r=>r.rating===s).length,
+    color:s>=4?'var(--good)':s===3?'var(--mid)':'var(--bad)'}));
+  hbars(document.getElementById('ratingChart'),rd,{fmt:d=>`${d.value} (${rated.length?Math.round(d.value/rated.length*100):0}%)`});
+
+  /* 긍부정 도넛 */
+  donut(document.getElementById('sentChart'),[
+    {label:'긍정(4~5)',value:pos,color:'var(--good)'},
+    {label:'중립(3)',value:neu,color:'var(--mid)'},
+    {label:'부정(1~2)',value:neg,color:'var(--bad)'},
+  ]);
+
+  /* 월별 추이 */
+  const mc={}; rows.forEach(r=>{const k=ym(r.date); if(k)mc[k]=(mc[k]||0)+1;});
+  const months=Object.keys(mc).sort();
+  lineChart(document.getElementById('trendChart'), months.map(m=>({label:m.slice(2),value:mc[m]})));
+
+  /* 옵션 Top10 */
+  hbars(document.getElementById('optionChart'),optArr.slice(0,10).map(o=>({label:o.label,value:o.value,color:'var(--accent)'})));
+
+  /* 세부 만족도 */
+  const ec=document.getElementById('evalChart'); ec.innerHTML='';
+  ['보습력','텍스처','향'].forEach(name=>{
+    const a=evalAgg[name]; const tot=a.good+a.mid+a.bad||1;
+    const row=document.createElement('div'); row.className='barrow';
+    row.innerHTML=`<div class="bl">${name}</div>
+      <div class="bt" style="display:flex">
+        <div class="bf" style="width:${a.good/tot*100}%;background:var(--good)" title="만족 ${a.good}"></div>
+        <div class="bf" style="width:${a.mid/tot*100}%;background:var(--mid)" title="보통 ${a.mid}"></div>
+        <div class="bf" style="width:${a.bad/tot*100}%;background:var(--bad)" title="불만족 ${a.bad}"></div>
+      </div>
+      <div class="bv">만족 ${pct(a)}%</div>`;
+    ec.appendChild(row);
+  });
+
+  /* 키워드 */
+  hbars(document.getElementById('kwChart'),keywords(rows).map(k=>({label:k.label,value:k.value,color:'var(--accent2)'})));
+
+  /* 테이블 필터 옵션 채우기 */
+  const fo=document.getElementById('fOption');
+  fo.innerHTML='<option value="">전체 옵션</option>'+optArr.map(o=>`<option>${esc(o.label)}</option>`).join('');
+  renderTable();
+}
+
+function evalData(rows){
+  const init=()=>({good:0,mid:0,bad:0});
+  const r={보습력:init(),텍스처:init(),향:init()};
+  rows.forEach(x=>{
+    const m={보습력:x.moisturizing,텍스처:x.texture,향:x.scent};
+    for(const k in m){const b=satBucket(m[k]); if(b)r[k][b]++;}
+  });
+  return r;
+}
+function pct(a){const t=a.good+a.mid+a.bad||1;return Math.round(a.good/t*100);}
+function fillList(id,arr){const ul=document.getElementById(id);ul.innerHTML='';arr.forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li);});}
+
+/* 테이블 */
+function renderTable(){
+  const q=(document.getElementById('q').value||'').toLowerCase();
+  const fr=document.getElementById('fRating').value;
+  const fop=document.getElementById('fOption').value;
+  let rows=DATA.filter(r=>{
+    if(fr&&r.rating!=+fr) return false;
+    if(fop&&r.option!==fop) return false;
+    if(q&&!(r.content||'').toLowerCase().includes(q)&&!(r.contentJp||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('rowCount').textContent=rows.length+'건';
+  const tb=document.getElementById('tbody'); tb.innerHTML='';
+  rows.slice(0,400).forEach(r=>{
+    const tr=document.createElement('tr');
+    const stars='★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
+    const sat=[r.moisturizing,r.texture,r.scent].map(v=>esc(v)||'-').join(' / ');
+    tr.innerHTML=`<td class="stars" title="${r.rating}점">${stars}</td>
+      <td style="white-space:nowrap;color:var(--muted)">${esc(r.date)||'-'}</td>
+      <td><span class="tag">${esc(r.option)}</span></td>
+      <td style="font-size:11.5px;color:var(--muted)">${sat}</td>
+      <td class="rev">${esc(r.content)||'-'}${r.contentJp?`<span class="jp">${esc(r.contentJp)}</span>`:''}</td>`;
+    tb.appendChild(tr);
+  });
+}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+/* ===================== 이벤트 ===================== */
+function loadText(text,isSample){
+  try{
+    const rows=normalize(parseCSV(text));
+    if(!rows.length){alert('리뷰 데이터를 찾지 못했습니다. CSV 형식을 확인하세요.');return;}
+    render(rows,isSample);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){alert('CSV 파싱 오류: '+e.message);}
+}
+const fileInput=document.getElementById('file');
+const drop=document.getElementById('drop');
+fileInput.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>loadText(rd.result,false);rd.readAsText(f,'utf-8');});
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>loadText(rd.result,false);rd.readAsText(f,'utf-8');});
+document.getElementById('resetBtn').addEventListener('click',()=>loadText(SAMPLE_CSV,true));
+['q','fRating','fOption'].forEach(id=>document.getElementById(id).addEventListener('input',renderTable));
+
+/* init */
+loadText(SAMPLE_CSV,true);
+</script>
+</body>
+</html>
