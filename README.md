@@ -12,7 +12,8 @@ Qoo10 일본(`qoo10.jp`)에서 **colorgram ティント(콜로그램 틴트)** �
 | 경로 | 설명 |
 |------|------|
 | `index.html` | **대시보드 (메인 산출물)**. 의존성 없는 단일 HTML — 더블클릭으로 바로 열림 |
-| `scripts/qoo10_crawler.py` | Qoo10 리뷰 크롤러 + Gemini 번역 스크립트 (참고/실행용) |
+| `scripts/qoo10_crawler.py` | 원본 Qoo10 크롤러 + Gemini 번역 (사내 모듈 의존, 참고용) |
+| `scripts/qoo10_crawler_standalone.py` | **단독 실행 크롤러** — `requests`+`bs4`만으로 동작, `review_result.csv` 직접 생성 |
 | `data/sample_review_result.csv` | 크롤러 출력 형식 예시 + 대시보드 업로드 테스트용 샘플 |
 
 ## 사용법
@@ -23,7 +24,11 @@ Qoo10 일본(`qoo10.jp`)에서 **colorgram ティント(콜로그램 틴트)** �
 ### 2) 실데이터로 분석
 1. 로컬(또는 `qoo10.jp` 가 허용된 환경)에서 크롤러 실행 → `review_result.csv` 생성
    ```bash
-   python scripts/qoo10_crawler.py   # PRODUCT_LIST, OUTPUT_PATH 수정 후
+   pip install requests beautifulsoup4
+   # 상품 gd_no 들을 지정 (번역 원하면 --translate + GEMINI_API_KEY)
+   python scripts/qoo10_crawler_standalone.py \
+       --product 1057459512 --product 1135003693 --product 1036494829 \
+       --out data/review_result.csv --translate
    ```
 2. 생성된 `review_result.csv` 를 `index.html` 화면의 업로드 영역에 **드래그&드롭**
 3. KPI · 차트 · 인사이트 결론이 실데이터로 즉시 갱신됩니다.
