@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>컬러그램 틴트 · Qoo10 일본 리뷰 VOC 대시보드 (실데이터)</title>
+<title>웨이크메이크 · 컬러그램 · Qoo10 일본 리뷰 VOC 대시보드 (실데이터)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
@@ -195,26 +195,28 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 }
 </style>
 <style>
-.fact-badge{background:rgba(5,150,105,.1);color:var(--pos);border:1px solid rgba(5,150,105,.3);
-  padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;}
+.fact-badge{background:rgba(5,150,105,.1);color:var(--pos);border:1px solid rgba(5,150,105,.3);padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;}
 .note-small{font-size:11px;color:var(--dim);margin-top:8px;}
+.prod-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.prod-tab{padding:10px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-family:inherit;font-size:13px;text-align:left;transition:.15s;}
+.prod-tab:hover{border-color:var(--accent);}
+.prod-tab.active{border-color:transparent;color:#fff;}
+.prod-tab .pt-brand{font-size:10px;opacity:.8;display:block;}
+.prod-tab .pt-name{font-weight:700;}
+.prod-tab .pt-meta{font-size:10px;opacity:.85;}
+.cat-chip{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(37,99,235,.08);color:var(--accent);font-weight:600;}
 </style>
 </head>
 <body>
 <nav class="top-nav" id="topNav">
   <button class="nav-btn active" data-section="sec-insight">인사이트 결론</button>
-  <button class="nav-btn" data-section="sec-rating">평점·감성</button>
-  <button class="nav-btn" data-section="sec-trend">리뷰 추이</button>
-  <button class="nav-btn" data-section="sec-product">상품별</button>
-  <button class="nav-btn" data-section="sec-color">인기 컬러</button>
-  <button class="nav-btn" data-section="sec-keyword">키워드</button>
-  <button class="nav-btn" data-section="sec-sat">세부 만족도</button>
-  <button class="nav-btn" data-section="sec-reviews">리뷰 원문</button>
+  <button class="nav-btn" data-section="sec-compare">브랜드·제품 비교</button>
+  <button class="nav-btn" data-section="sec-detail">제품별 상세</button>
 </nav>
 
 <div class="db">
   <div class="header">
-    <h1>컬러그램 틴트 · Qoo10 일본 리뷰 VOC 대시보드</h1>
+    <h1>웨이크메이크 · 컬러그램 · Qoo10 일본 리뷰 VOC</h1>
     <div class="sub" id="subline"></div>
   </div>
 
@@ -226,62 +228,46 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     <div class="kpi-row" id="kpis"></div>
   </div>
 
-  <div class="section-group" id="sec-rating">
-    <div class="st">평점 분포 · 감성</div>
+  <div class="section-group" id="sec-compare">
+    <div class="st">브랜드·제품 비교</div>
+    <div class="card gf"><table class="comp-table" id="prodTable"></table>
+      <div class="note-small" id="cmpNote"></div>
+    </div>
     <div class="g2">
-      <div class="card"><h3>평점 분포 (1~5점)</h3><canvas id="ratingChart"></canvas></div>
+      <div class="card"><h3>제품별 리뷰 수</h3><canvas id="cntChart" style="max-height:280px;"></canvas></div>
+      <div class="card"><h3>제품별 평균 평점</h3><canvas id="avgChart" style="max-height:280px;"></canvas></div>
+    </div>
+    <div class="note-small">※ 세 제품은 카테고리가 다릅니다(립·블러링 / 파운데이션 / 립틴트). 동일 잣대 비교가 아니라 제품별 특성으로 보세요.</div>
+  </div>
+
+  <div class="section-group" id="sec-detail">
+    <div class="st">제품별 상세 분석</div>
+    <div class="prod-tabs" id="prodTabs"></div>
+    <div id="detailHead" style="margin-bottom:14px;"></div>
+    <div class="g2">
+      <div class="card"><h3>평점 분포</h3><canvas id="ratingChart"></canvas></div>
       <div class="card"><h3>긍·부정 비중 <span class="dim" style="font-weight:400;font-size:11px;">(평점 기준)</span></h3><canvas id="sentChart"></canvas></div>
     </div>
-  </div>
-
-  <div class="section-group" id="sec-trend">
-    <div class="st">월별 리뷰 추이 · 평균 평점</div>
-    <div class="card gf"><canvas id="trendChart" style="max-height:340px;"></canvas></div>
-  </div>
-
-  <div class="section-group" id="sec-product">
-    <div class="st">상품별 비교</div>
-    <div class="card gf"><table class="comp-table" id="prodTable"></table>
-      <div class="note-small">※ 크롤 데이터에 브랜드/상품명 컬럼이 비어 있어 상품ID·대표 옵션으로 표기합니다(임의 명칭 부여 없음).</div>
-    </div>
-  </div>
-
-  <div class="section-group" id="sec-color">
-    <div class="st">인기 컬러(옵션) Top 15</div>
-    <div class="card gf"><canvas id="colorChart" style="max-height:480px;"></canvas></div>
-  </div>
-
-  <div class="section-group" id="sec-keyword">
-    <div class="st">리뷰 키워드 — 고평점 vs 저평점</div>
+    <div class="card gf"><h3>월별 리뷰 추이 · 평균 평점</h3><canvas id="trendChart" style="max-height:320px;"></canvas></div>
+    <div class="card gf"><h3>인기 옵션(컬러/쉐이드) Top 15</h3><canvas id="colorChart" style="max-height:460px;"></canvas></div>
     <div class="g2">
       <div class="card"><h3 style="color:var(--pos);">👍 고평점(4~5점) 키워드</h3><div class="kw-bar-container" id="kwHigh"></div></div>
       <div class="card"><h3 style="color:var(--neg);">👎 저평점(1~3점) 키워드</h3><div class="kw-bar-container" id="kwLow"></div></div>
     </div>
     <div class="note-small" id="kwNote"></div>
-  </div>
-
-  <div class="section-group" id="sec-sat">
-    <div class="st">세부 만족도 (보습력·텍스처·향)</div>
-    <div class="card gf"><div id="satBars"></div>
-      <div class="legend" style="margin-top:12px;display:flex;gap:16px;font-size:12px;color:var(--dim);">
-        <span>🟩 만족 &nbsp; 🟨 보통 &nbsp; 🟥 불만족</span></div>
+    <div class="card gf"><h3>세부 만족도 (보습력·텍스처·향)</h3><div id="satBars"></div>
       <div class="note-small" id="satNote"></div>
     </div>
-  </div>
-
-  <div class="section-group" id="sec-reviews">
-    <div class="st">리뷰 원문 (번역 표본)</div>
-    <div class="card gf">
+    <div class="card gf"><h3>리뷰 원문 (번역 표본)</h3>
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
         <input id="q" placeholder="키워드 검색…" style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
         <select id="fr" style="padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
           <option value="">전체 평점</option><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
-        <span class="tag dim" id="rowCount" style="align-self:center;font-size:12px;"></span>
+        <span class="dim" id="rowCount" style="align-self:center;font-size:12px;"></span>
       </div>
-      <div style="max-height:460px;overflow:auto;border:1px solid var(--border);border-radius:10px;">
+      <div style="max-height:440px;overflow:auto;border:1px solid var(--border);border-radius:10px;">
         <table class="comp-table" id="revTable" style="font-size:12px;"></table>
       </div>
-      <div class="note-small">※ 원문 60,352건 중 한국어 번역분 표본을 표시합니다.</div>
     </div>
   </div>
 
@@ -304,104 +290,104 @@ window.DASH = /*__DASH_DATA__*/null;
   });
 
   $('subline').innerHTML = `검색어 <span>colorgram ティント</span> · 실제 Qoo10 리뷰 <span>${D.meta.total.toLocaleString()}</span>건 · `+
-    `상품 <span>${D.meta.products}</span>개 · 기간 ${D.meta.date_min} ~ ${D.meta.date_max}`;
-
+    `브랜드 <span>${D.meta.brand_count}</span> · 제품 <span>${D.meta.product_count}</span> · 기간 ${D.meta.date_min} ~ ${D.meta.date_max}`;
   $('insightList').innerHTML = D.insights.map(t=>`<li>${t}</li>`).join('');
 
   $('kpis').innerHTML = [
     ['총 리뷰', D.meta.total.toLocaleString(), `${D.meta.date_min} ~ ${D.meta.date_max}`],
-    ['평균 평점', D.meta.avg, '5점 만점'],
-    ['긍정 비율', D.meta.pos_pct+'%', `긍정 ${D.meta.pos.toLocaleString()} / 부정 ${D.meta.neg.toLocaleString()}`],
-    ['분석 상품', D.meta.products+'개', '컬러그램 틴트'],
+    ['브랜드', D.meta.brand_count+'개', D.brands.map(b=>b.name).join(' · ')],
+    ['제품', D.meta.product_count+'개', D.meta.categories],
+    ['전체 평균', D.meta.avg, '5점 만점 (카테고리 혼합)'],
   ].map(k=>`<div class="kpi"><div class="label">${k[0]}</div><div class="value">${k[1]}</div><div class="note">${esc(k[2])}</div></div>`).join('');
 
-  // 평점 분포
-  new Chart($('ratingChart'),{type:'bar',
-    data:{labels:D.rating_dist.map(r=>r.score+'점'),datasets:[{data:D.rating_dist.map(r=>r.count),
-      backgroundColor:D.rating_dist.map(r=>r.score>=4?'#059669':r.score==3?'#d97706':'#dc2626')}]},
-    options:{plugins:{legend:{display:false},datalabels:{display:true,anchor:'end',align:'end',
-      color:'#475569',font:{size:11},formatter:v=>v.toLocaleString()}},
-      scales:{y:{grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}});
-
-  // 감성 도넛
-  new Chart($('sentChart'),{type:'doughnut',
-    data:{labels:['긍정(4~5)','중립(3)','부정(1~2)'],datasets:[{data:[D.meta.pos,D.meta.neu,D.meta.neg],
-      backgroundColor:['#059669','#d97706','#dc2626']}]},
-    options:{plugins:{legend:{position:'right'},datalabels:{display:true,color:'#fff',font:{size:12,weight:700},
-      formatter:(v,c)=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);const p=v/t*100;return p>=4?p.toFixed(1)+'%':'';}}}}});
-
-  // 추이 (리뷰수 + 평균평점 이중축)
-  new Chart($('trendChart'),{
-    data:{labels:D.trend.map(t=>t.month),datasets:[
-      {type:'bar',label:'리뷰 수',data:D.trend.map(t=>t.count),backgroundColor:'rgba(37,99,235,.5)',yAxisID:'y'},
-      {type:'line',label:'평균 평점',data:D.trend.map(t=>t.avg),borderColor:'#dc2626',backgroundColor:'#dc2626',
-        tension:.3,pointRadius:0,yAxisID:'y1'}]},
-    options:{plugins:{legend:{position:'bottom'}},interaction:{mode:'index',intersect:false},
-      scales:{y:{position:'left',grid:{color:'#f1f5f9'},title:{display:true,text:'리뷰 수'}},
-              y1:{position:'right',min:0,max:5,grid:{display:false},title:{display:true,text:'평균 평점'}},
-              x:{grid:{display:false},ticks:{maxTicksLimit:16}}}}});
-
-  // 상품별 테이블
-  $('prodTable').innerHTML='<thead><tr><th>상품 ID</th><th>주요 라인</th><th>대표 옵션</th><th>옵션수</th><th>리뷰수</th><th>평균</th><th>긍정%</th></tr></thead><tbody>'+
-    D.products.map(p=>`<tr><td><b>${esc(p.product_id)}</b></td><td>${esc(p.main_line)}</td>
-      <td class="dim">${esc(p.example)}</td><td class="num">${p.options}</td>
+  // 비교 표 (제품) + 브랜드 요약
+  $('prodTable').innerHTML='<thead><tr><th>브랜드</th><th>제품</th><th>카테고리</th><th>리뷰수</th><th>평균</th><th>긍정%</th><th>옵션수</th></tr></thead><tbody>'+
+    D.products.map(p=>`<tr>
+      <td><span class="brand-cell"><span class="dot" style="background:${p.color}"></span>${esc(p.brand)}</span></td>
+      <td><b>${esc(p.product)}</b></td><td><span class="cat-chip">${esc(p.category)}</span></td>
       <td class="num">${p.count.toLocaleString()}</td><td class="num"><span class="star">★</span> ${p.avg}</td>
-      <td class="num">${p.pos_pct}%</td></tr>`).join('')+'</tbody>';
+      <td class="num">${p.pos_pct}%</td><td class="num">${p.opt_n}</td></tr>`).join('')+'</tbody>';
+  $('cmpNote').innerHTML = '브랜드 요약 — ' + D.brands.map(b=>`<b>${esc(b.name)}</b> ${b.count.toLocaleString()}건·평균 ${b.avg}·긍정 ${b.pos_pct}%`).join(' &nbsp;|&nbsp; ');
 
-  // 인기 컬러
-  new Chart($('colorChart'),{type:'bar',
-    data:{labels:D.opt_top.map(o=>o.label),datasets:[{data:D.opt_top.map(o=>o.count),backgroundColor:'#2563eb'}]},
-    options:{indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:true,anchor:'end',align:'end',
-      color:'#475569',font:{size:10},formatter:v=>v.toLocaleString()}},
-      scales:{x:{grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}}});
+  new Chart($('cntChart'),{type:'bar',data:{labels:D.products.map(p=>p.product),
+    datasets:[{data:D.products.map(p=>p.count),backgroundColor:D.products.map(p=>p.color)}]},
+    options:{plugins:{legend:{display:false},datalabels:{display:true,anchor:'end',align:'end',color:'#475569',font:{size:11},formatter:v=>v.toLocaleString()}},scales:{y:{grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}});
+  new Chart($('avgChart'),{type:'bar',data:{labels:D.products.map(p=>p.product),
+    datasets:[{data:D.products.map(p=>p.avg),backgroundColor:D.products.map(p=>p.color)}]},
+    options:{plugins:{legend:{display:false},datalabels:{display:true,anchor:'end',align:'end',color:'#475569',font:{size:12,weight:700}}},scales:{y:{min:0,max:5,grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}});
 
-  // 키워드 바
-  function kwBars(el, list, color){
-    const max=Math.max(1,...list.map(x=>x.count));
-    el.innerHTML = list.length? list.map(x=>`<div class="kw-bar-item"><div class="kw-bar-row">
-      <div class="kw-label">${esc(x.kw)}</div>
-      <div class="kw-track"><div class="kw-fill" style="width:${x.count/max*100}%;background:${color}">${x.count.toLocaleString()}</div></div>
-      </div></div>`).join('') : '<div class="dim" style="font-size:12px;">데이터 소수</div>';
+  // ===== 제품 탭 =====
+  $('prodTabs').innerHTML = D.products.map((p,i)=>`<button class="prod-tab${i===0?' active':''}" data-i="${i}" style="${i===0?`background:${p.color}`:''}">
+    <span class="pt-brand">${esc(p.brand)}</span><span class="pt-name">${esc(p.product)}</span>
+    <span class="pt-meta">${p.count.toLocaleString()}건 · ★${p.avg}</span></button>`).join('');
+
+  let charts={};
+  function destroy(){Object.values(charts).forEach(c=>c&&c.destroy());charts={};}
+
+  function renderProduct(p){
+    destroy();
+    $('detailHead').innerHTML=`<div class="card" style="padding:14px 18px;border-left:4px solid ${p.color};">
+      <b style="font-size:15px;">${esc(p.brand)} · ${esc(p.product)}</b> <span class="cat-chip">${esc(p.category)}</span>
+      <span class="dim" style="font-size:12px;margin-left:8px;">${p.count.toLocaleString()}건 · 평균 ${p.avg}점 · 긍정 ${p.pos_pct}% · 기간 ${p.date_min}~${p.date_max} · <a href="${esc(p.url)}" target="_blank">Qoo10↗</a></span></div>`;
+
+    charts.rating=new Chart($('ratingChart'),{type:'bar',data:{labels:p.rating_dist.map(r=>r.score+'점'),
+      datasets:[{data:p.rating_dist.map(r=>r.count),backgroundColor:p.rating_dist.map(r=>r.score>=4?'#059669':r.score==3?'#d97706':'#dc2626')}]},
+      options:{plugins:{legend:{display:false},datalabels:{display:true,anchor:'end',align:'end',color:'#475569',font:{size:11},formatter:v=>v.toLocaleString()}},scales:{y:{grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}});
+
+    charts.sent=new Chart($('sentChart'),{type:'doughnut',data:{labels:['긍정(4~5)','중립(3)','부정(1~2)'],
+      datasets:[{data:[p.pos,p.neu,p.neg],backgroundColor:['#059669','#d97706','#dc2626']}]},
+      options:{plugins:{legend:{position:'right'},datalabels:{display:true,color:'#fff',font:{size:12,weight:700},
+        formatter:(v,c)=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);const x=v/t*100;return x>=4?x.toFixed(1)+'%':'';}}}}});
+
+    charts.trend=new Chart($('trendChart'),{data:{labels:p.trend.map(t=>t.month),datasets:[
+      {type:'bar',label:'리뷰 수',data:p.trend.map(t=>t.count),backgroundColor:p.color+'80',yAxisID:'y'},
+      {type:'line',label:'평균 평점',data:p.trend.map(t=>t.avg),borderColor:'#1e293b',tension:.3,pointRadius:0,yAxisID:'y1'}]},
+      options:{plugins:{legend:{position:'bottom'}},interaction:{mode:'index',intersect:false},
+        scales:{y:{position:'left',grid:{color:'#f1f5f9'},title:{display:true,text:'리뷰 수'}},
+                y1:{position:'right',min:0,max:5,grid:{display:false},title:{display:true,text:'평균'}},
+                x:{grid:{display:false},ticks:{maxTicksLimit:16}}}}});
+
+    charts.color=new Chart($('colorChart'),{type:'bar',data:{labels:p.opt_top.map(o=>o.label),
+      datasets:[{data:p.opt_top.map(o=>o.count),backgroundColor:p.color}]},
+      options:{indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:true,anchor:'end',align:'end',color:'#475569',font:{size:10},formatter:v=>v.toLocaleString()}},scales:{x:{grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}}});
+
+    function kwBars(el,list,color){const max=Math.max(1,...list.map(x=>x.count));
+      el.innerHTML=list.length?list.map(x=>`<div class="kw-bar-item"><div class="kw-bar-row"><div class="kw-label">${esc(x.kw)}</div>
+        <div class="kw-track"><div class="kw-fill" style="width:${x.count/max*100}%;background:${color}">${x.count.toLocaleString()}</div></div></div></div>`).join(''):'<div class="dim" style="font-size:12px;">데이터 소수</div>';}
+    kwBars($('kwHigh'),p.kw_high,'#059669'); kwBars($('kwLow'),p.kw_low,'#dc2626');
+    $('kwNote').textContent=`※ 키워드는 한국어 번역분 ${p.trans_n.toLocaleString()}건 기준 (고평점 ${p.high_n.toLocaleString()} · 저평점 ${p.low_n.toLocaleString()}), 리뷰당 1회(문서빈도).`;
+
+    $('satBars').innerHTML=Object.entries(p.sat).map(([axis,a])=>{const tot=a.good+a.mid+a.bad||1;
+      return `<div style="display:flex;align-items:center;gap:12px;margin:10px 0;">
+        <div style="width:70px;font-size:13px;font-weight:600;">${axis}</div>
+        <div style="flex:1;display:flex;height:22px;border-radius:6px;overflow:hidden;background:#f1f5f9;">
+          <div style="width:${a.good/tot*100}%;background:#059669;"></div><div style="width:${a.mid/tot*100}%;background:#d97706;"></div><div style="width:${a.bad/tot*100}%;background:#dc2626;"></div></div>
+        <div style="width:170px;text-align:right;font-size:12px;color:var(--dim);">만족 ${a.good}·보통 ${a.mid}·불만 ${a.bad} <b>(N=${a.n})</b></div></div>`;}).join('');
+    $('satNote').textContent='※ 🟩만족 🟨보통 🟥불만. 크롤 데이터의 만족도 항목은 대부분 "해당없음"이라 유효응답(N)이 적습니다. 표본이 작으면 해석에 주의.';
+
+    window._sample=p.sample; renderRows();
   }
-  kwBars($('kwHigh'), D.kw_high, '#059669');
-  kwBars($('kwLow'), D.kw_low, '#dc2626');
-  $('kwNote').textContent = `※ 키워드는 한국어 번역된 ${D.meta.trans_n.toLocaleString()}건 기준 (고평점 ${D.meta.high_n.toLocaleString()}건 · 저평점 ${D.meta.low_n.toLocaleString()}건), 리뷰당 1회 집계(문서빈도).`;
 
-  // 세부 만족도
-  const sat=D.sat;
-  $('satBars').innerHTML = Object.entries(sat).map(([axis,a])=>{
-    const tot=a.good+a.mid+a.bad||1;
-    return `<div style="display:flex;align-items:center;gap:12px;margin:10px 0;">
-      <div style="width:70px;font-size:13px;font-weight:600;">${axis}</div>
-      <div style="flex:1;display:flex;height:22px;border-radius:6px;overflow:hidden;background:#f1f5f9;">
-        <div style="width:${a.good/tot*100}%;background:#059669;"></div>
-        <div style="width:${a.mid/tot*100}%;background:#d97706;"></div>
-        <div style="width:${a.bad/tot*100}%;background:#dc2626;"></div>
-      </div>
-      <div style="width:160px;text-align:right;font-size:12px;color:var(--dim);">만족 ${a.good} · 보통 ${a.mid} · 불만 ${a.bad} <b>(N=${a.n})</b></div>
-    </div>`;
-  }).join('');
-  $('satNote').textContent = '※ 크롤 데이터의 보습/텍스처/향 항목은 대부분 "해당없음"으로, 유효 응답(N)이 적습니다. 표본이 작아 해석에 주의가 필요합니다.';
-
-  // 리뷰 테이블
   function renderRows(){
     const q=($('q').value||'').toLowerCase(); const fr=$('fr').value;
-    let rows=D.sample.filter(r=>{
-      if(fr && r.rating!=+fr) return false;
-      if(q && !(r.kr||'').toLowerCase().includes(q) && !(r.jp||'').toLowerCase().includes(q)) return false;
-      return true;
-    });
+    let rows=(window._sample||[]).filter(r=>{if(fr&&r.rating!=+fr)return false;
+      if(q&&!(r.kr||'').toLowerCase().includes(q)&&!(r.jp||'').toLowerCase().includes(q))return false;return true;});
     $('rowCount').textContent=rows.length+'건 표시';
     $('revTable').innerHTML='<thead><tr><th>평점</th><th>날짜</th><th>옵션</th><th>리뷰(번역)</th></tr></thead><tbody>'+
-      rows.slice(0,200).map(r=>`<tr><td class="star" style="white-space:nowrap;">${'★'.repeat(r.rating)}</td>
-        <td class="dim" style="white-space:nowrap;">${esc(r.date)}</td>
-        <td><span class="tag">${esc(r.option)}</span></td>
+      rows.slice(0,150).map(r=>`<tr><td class="star" style="white-space:nowrap;">${'★'.repeat(r.rating)}</td>
+        <td class="dim" style="white-space:nowrap;">${esc(r.date)}</td><td><span class="cat-chip">${esc(r.option)}</span></td>
         <td>${esc(r.kr)}<div class="dim" style="font-size:11px;margin-top:2px;">${esc(r.jp)}</div></td></tr>`).join('')+'</tbody>';
   }
-  $('q').oninput=renderRows; $('fr').onchange=renderRows; renderRows();
+  $('q').oninput=renderRows; $('fr').onchange=renderRows;
 
-  $('footer').innerHTML = `출처: Qoo10 Japan 실제 리뷰 크롤 (review_result.csv) · 총 ${D.meta.total.toLocaleString()}건 · `+
-    `모든 수치는 실데이터 집계이며 추론·합성 없음. 만족도/키워드는 데이터에 실재하는 응답·번역분만 사용.`;
+  $('prodTabs').querySelectorAll('.prod-tab').forEach(btn=>btn.onclick=()=>{
+    $('prodTabs').querySelectorAll('.prod-tab').forEach(b=>{b.classList.remove('active');b.style.background='';});
+    btn.classList.add('active'); const p=D.products[+btn.dataset.i]; btn.style.background=p.color;
+    renderProduct(p);
+  });
+  renderProduct(D.products[0]);
+
+  $('footer').innerHTML=`출처: Qoo10 Japan 실제 리뷰 크롤 (review_result.csv) · 총 ${D.meta.total.toLocaleString()}건 · 추론·합성 없음, 실데이터 집계.`;
 })();
 </script>
 </body>
