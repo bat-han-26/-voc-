@@ -225,6 +225,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
       <h3>🔎 인사이트 결론 <span class="fact-badge">100% 실데이터</span></h3>
       <div class="insight-box"><ul id="insightList" style="margin:0;padding-left:18px;line-height:2;"></ul></div>
     </div>
+    <div class="st" style="margin-top:8px;">제품별 VOC 인사이트 요약</div>
+    <div class="g3" id="vocSummary"></div>
     <div class="kpi-row" id="kpis"></div>
   </div>
 
@@ -292,6 +294,26 @@ window.DASH = /*__DASH_DATA__*/null;
   $('subline').innerHTML = `검색어 <span>colorgram ティント</span> · 실제 Qoo10 리뷰 <span>${D.meta.total.toLocaleString()}</span>건 · `+
     `브랜드 <span>${D.meta.brand_count}</span> · 제품 <span>${D.meta.product_count}</span> · 기간 ${D.meta.date_min} ~ ${D.meta.date_max}`;
   $('insightList').innerHTML = D.insights.map(t=>`<li>${t}</li>`).join('');
+
+  // ===== 제품별 VOC 인사이트 요약 카드 =====
+  const chips = (arr,cls)=> (arr&&arr.length)? arr.map(w=>`<span class="opp-tag ${cls}">${esc(w)}</span>`).join('') : '<span class="dim" style="font-size:11px;">표본 적음</span>';
+  $('vocSummary').innerHTML = D.products.map(p=>{
+    const v=p.voc||{};
+    return `<div class="opp-card" style="border-top:3px solid ${p.color};">
+      <div class="opp-header"><span class="opp-brand">${esc(p.brand)} · ${esc(p.product)}</span>
+        <span class="opp-review-cnt">${p.count.toLocaleString()}건</span></div>
+      <div style="font-size:12px;color:var(--dim);margin-bottom:10px;">
+        <span class="cat-chip">${esc(p.category)}</span> 평균 <b style="color:var(--text)">★${p.avg}</b> · 긍정 <b style="color:var(--pos)">${p.pos_pct}%</b> · 부정 ${(100-p.pos_pct-(p.neu/p.count*100)).toFixed(1)}%</div>
+      <div class="opp-section"><div class="opp-section-title" style="color:var(--pos);">👍 강점 (고평점 변별 키워드)</div>
+        <div class="opp-tags">${chips(v.pros,'opp-tag-green')}</div></div>
+      <div class="opp-section"><div class="opp-section-title" style="color:var(--neg);">👎 약점/개선 (저평점 변별 키워드)</div>
+        <div class="opp-tags">${chips(v.cons,'opp-tag-red')}</div></div>
+      <div class="opp-opportunities" style="font-size:11px;">
+        ${v.pos_quote?`<div class="opp-idea">💬 <b>대표 호평</b>: "${esc(v.pos_quote)}"</div>`:''}
+        ${v.neg_quote?`<div class="opp-idea">⚠ <b>대표 불만</b>: "${esc(v.neg_quote)}"</div>`:`<div class="opp-idea dim">⚠ 저평점(1~2점) 표본 적음 (n=${v.neg_sample_n||0})</div>`}
+        <div class="opp-idea" style="margin-top:6px;color:var(--dim);">🎨 최다 옵션: <b style="color:var(--text)">${esc(v.top_option)}</b> · 📈 피크: ${esc(v.peak)}</div>
+      </div></div>`;
+  }).join('');
 
   $('kpis').innerHTML = [
     ['총 리뷰', D.meta.total.toLocaleString(), `${D.meta.date_min} ~ ${D.meta.date_max}`],

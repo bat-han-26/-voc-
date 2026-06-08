@@ -102,6 +102,46 @@ def agg_group(g):
     out["trans_n"] = len(trans)
     out["high_n"] = int((trans["rating"] >= 4).sum())
     out["low_n"] = int((trans["rating"] <= 3).sum())
+
+    # ---- 강점/약점 '변별 키워드' (고평점 vs 저평점 상대빈도 차이) + 대표 실후기 ----
+    def docs(sub):
+        return [set(tokenize_ko(t)) for t in sub["review_content_kr"]]
+    hi_docs = docs(trans[trans["rating"] >= 4])
+    lo_docs = docs(trans[trans["rating"] <= 2])
+    if len(lo_docs) < 8:                       # 1~2점이 너무 적으면 3점까지 포함
+        lo_docs = docs(trans[trans["rating"] <= 3])
+
+    def dfreq(ds):
+        c = Counter()
+        for s in ds:
+            c.update(s)
+        return c
+    hf, lf = dfreq(hi_docs), dfreq(lo_docs)
+    H, L = max(1, len(hi_docs)), max(1, len(lo_docs))
+    pros_distinct = sorted([w for w in hf if hf[w] >= max(5, H * 0.02)],
+                           key=lambda w: hf[w] / H - lf.get(w, 0) / L, reverse=True)[:6]
+    _cons_noise = {"상품", "자체", "생각했던", "저한테", "그것", "부분", "느낌"}
+    cons_distinct = [w for w in sorted([w for w in lf if lf[w] >= max(2, L * 0.03)],
+                                       key=lambda w: lf[w] / L - hf.get(w, 0) / H, reverse=True)
+                     if w not in set(pros_distinct) and w not in _cons_noise][:6]
+
+    def pick_quote(sub, lo, hi):
+        cand = [str(t).strip() for t in sub["review_content_kr"] if lo <= len(str(t).strip()) <= hi]
+        cand.sort(key=len, reverse=True)
+        return cand[0] if cand else None
+    pos_quote = pick_quote(trans[trans["rating"] >= 5], 18, 90)
+    neg_sub = trans[trans["rating"] <= 2]
+    neg_quote = pick_quote(neg_sub, 12, 110)
+
+    peak = max(out["trend"], key=lambda t: t["count"]) if out["trend"] else None
+    out["voc"] = {
+        "pros": pros_distinct or [k["kw"] for k in out["kw_high"][:5]],
+        "cons": cons_distinct,
+        "top_option": out["opt_top"][0]["label"] if out["opt_top"] else "-",
+        "peak": f"{peak['month']} ({peak['count']:,}건)" if peak else "-",
+        "pos_quote": pos_quote, "neg_quote": neg_quote,
+        "neg_sample_n": int((trans["rating"] <= 2).sum()),
+    }
     # 리뷰 표본
     sample = []
     for _, r in trans.head(200).iterrows():
