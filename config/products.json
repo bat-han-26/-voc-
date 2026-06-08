@@ -1,9 +1,9 @@
 {
-  "_comment": "콜로그램 + 경쟁 틴트 브랜드 설정. Qoo10 상품 gd_no 를 채우세요. (URL https://www.qoo10.jp/g/<gd_no> 의 숫자)",
+  "_comment": "컬러그램 + 경쟁 틴트 브랜드 설정. Qoo10 상품 gd_no 를 채우세요. (URL https://www.qoo10.jp/g/<gd_no> 의 숫자)",
   "keyword": "colorgram ティント",
   "brands": [
     {
-      "name": "콜로그램",
+      "name": "컬러그램",
       "name_en": "colorgram",
       "color": "#2563eb",
       "is_ours": true,
