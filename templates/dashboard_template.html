@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>콜로그램 틴트 · Qoo10 경쟁 VOC 딥다이브 대시보드</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#1e293b;--dim:#64748b;--accent:#2563eb;--accent2:#1e3a5f;--pos:#059669;--neg:#dc2626;--warn:#d97706;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding-top:52px;}
+.db{max-width:1520px;margin:0 auto;padding:32px 24px;}
+.header{text-align:center;margin-bottom:36px;}
+.header h1{font-size:24px;font-weight:700;}
+.header .sub{color:var(--dim);font-size:13px;margin-top:6px;}
+.header .sub span{color:var(--accent2);font-weight:600;}
+.header::after{content:'';display:block;width:140px;height:3px;background:var(--accent2);margin:14px auto 0;border-radius:2px;}
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.kpi .label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.kpi .value{font-size:30px;font-weight:700;}
+.kpi .note{font-size:11px;color:var(--dim);margin-top:4px;}
+.kpi .value{color:var(--accent2);}
+.st{font-size:17px;font-weight:700;margin:40px 0 18px;padding-left:14px;border-left:3px solid var(--accent);}
+.gf{margin-bottom:22px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:22px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.card h3{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.card canvas{max-height:360px;}
+.comp-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
+.comp-table th{color:var(--dim);font-weight:500;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+.comp-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;}
+.comp-table td.num{text-align:center;}
+.comp-table tr:hover td{background:#f8fafc;}
+.brand-cell{display:flex;align-items:center;gap:8px;}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;}
+.dim{color:var(--dim);}
+.star{color:var(--warn);}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;}
+.badge-green{background:rgba(5,150,105,.08);color:var(--pos);}
+.badge-red{background:rgba(220,38,38,.08);color:var(--neg);}
+.kw-bar-container{display:flex;flex-direction:column;gap:4px;}
+.kw-bar-item{cursor:pointer;transition:background .2s;border-radius:8px;padding:4px 8px;}
+.kw-bar-item:hover{background:#f1f5f9;}
+.kw-bar-row{display:flex;align-items:center;gap:10px;}
+.kw-label{font-size:12px;min-width:100px;text-align:right;white-space:nowrap;font-weight:500;}
+.kw-track{flex:1;height:22px;background:#f1f5f9;border-radius:6px;overflow:hidden;}
+.kw-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:600;color:#fff;transition:width .6s;min-width:fit-content;}
+.kw-count{font-size:12px;color:var(--dim);min-width:55px;text-align:right;}
+.kw-pct{font-size:11px;color:var(--accent);min-width:45px;text-align:right;font-weight:600;}
+.kw-details{display:none;padding:6px 12px 6px 116px;font-size:11px;color:var(--dim);line-height:1.8;}
+.kw-details.open{display:block;}
+.kw-details .tag{display:inline-block;background:rgba(37,99,235,.08);color:var(--accent);padding:1px 8px;border-radius:8px;font-size:11px;margin:2px 3px;}
+.kw-samples{margin-top:6px;padding:4px 0;border-top:1px dashed #e2e8f0;}
+.kw-sample-item{padding:5px 0;font-size:11px;color:#374151;line-height:1.6;display:flex;gap:6px;align-items:flex-start;}
+.kw-sample-label{flex-shrink:0;font-size:10px;font-weight:600;color:var(--accent);background:rgba(37,99,235,.06);padding:2px 6px;border-radius:4px;white-space:nowrap;}
+.kw-sample-rating{flex-shrink:0;font-size:10px;color:#f59e0b;}
+.kw-sample-text{font-size:11px;color:#4b5563;word-break:break-all;}
+.donut-samples{margin-top:10px;padding:10px;background:#f8fafc;border-radius:8px;display:none;}
+.donut-samples.open{display:block;}
+.donut-samples-title{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+.donut-sample-item{padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:11px;line-height:1.6;}
+.donut-sample-item:last-child{border-bottom:none;}
+.donut-sample-label{font-size:10px;font-weight:600;color:var(--accent);margin-right:4px;}
+.donut-sample-rating{font-size:10px;color:#f59e0b;margin-right:4px;}
+.detail-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.detail-col{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:11px;}
+.detail-col .col-header{font-weight:700;font-size:12px;margin-bottom:10px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mini-bar-row{display:flex;align-items:center;gap:4px;margin-bottom:5px;}
+.mini-bar-label{min-width:56px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;}
+.mini-bar-track{flex:1;height:14px;background:#f1f5f9;border-radius:4px;overflow:hidden;}
+.mini-bar-fill{height:100%;border-radius:4px;}
+.mini-bar-val{font-size:10px;color:var(--dim);min-width:30px;text-align:right;}
+/* Migration */
+.mig-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+.mig-stat{display:flex;gap:24px;margin-bottom:16px;}
+.mig-stat-item{text-align:center;}
+.mig-stat-item .mv{font-size:24px;font-weight:700;color:var(--accent2);}
+.mig-stat-item .ml{font-size:11px;color:var(--dim);}
+.mig-row{padding:10px 12px;border-bottom:1px solid #f1f5f9;cursor:pointer;border-radius:8px;transition:background .15s;}
+.mig-row:hover,.mig-row.active{background:rgba(37,99,235,.06);}
+.mig-pattern{font-size:13px;font-weight:600;color:var(--accent);}
+.mig-pattern .cnt{color:var(--dim);font-weight:400;font-size:12px;margin-left:6px;}
+.mig-example{background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:12px;color:var(--text);line-height:1.6;border-left:3px solid var(--accent2);}
+.mig-example .ex-brand{color:var(--accent2);font-weight:600;font-size:11px;display:block;margin-bottom:2px;}
+.mig-example .ex-text{color:var(--dim);}
+.mig-placeholder{color:var(--dim);font-size:12px;padding:20px;text-align:center;}
+.map-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.map-legend-item{display:flex;align-items:center;gap:4px;font-size:11px;}
+/* Skin type */
+.skin-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+.skin-filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.skin-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit;}
+.skin-btn:hover{border-color:var(--accent);color:var(--accent);}
+.skin-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.skin-filter-note{font-size:11px;color:var(--accent);font-weight:500;margin-bottom:8px;display:none;}
+.skin-filter-note.show{display:block;}
+/* Marketing insight */
+.mkt-card{background:linear-gradient(135deg,rgba(37,99,235,.03),rgba(30,58,95,.03));border:1px solid rgba(37,99,235,.12);}
+
+/* ── NEW v6 Styles ── */
+/* Heatmap table */
+.heatmap-table{width:100%;border-collapse:collapse;font-size:11px;}
+.heatmap-table th{padding:8px 6px;font-size:10px;color:var(--dim);font-weight:600;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;}
+.heatmap-table th:first-child{text-align:left;min-width:90px;}
+.heatmap-table td{padding:6px;text-align:center;font-weight:600;font-size:11px;border-bottom:1px solid #f8fafc;}
+.heatmap-table td:first-child{text-align:left;font-weight:600;font-size:11px;white-space:nowrap;}
+.heatmap-table tr:hover td{background:rgba(37,99,235,.03);}
+.hm-cell{border-radius:6px;padding:4px 2px;display:inline-block;min-width:42px;}
+
+/* Retention bar */
+.ret-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:6px 0;border-bottom:1px solid #f8fafc;}
+.ret-label{min-width:90px;font-size:11px;font-weight:600;white-space:nowrap;}
+.ret-bars{flex:1;display:flex;gap:2px;align-items:center;}
+.ret-bar{height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;min-width:30px;}
+.ret-ratio{min-width:60px;text-align:right;font-size:12px;font-weight:700;}
+
+/* Churn heatmap */
+.churn-table{width:100%;border-collapse:collapse;font-size:11px;}
+.churn-table th{padding:6px;font-size:10px;color:var(--dim);text-align:center;border-bottom:1px solid var(--border);}
+.churn-table th:first-child{text-align:left;}
+.churn-table td{padding:5px;text-align:center;font-size:11px;border-bottom:1px solid #f8fafc;}
+.churn-table td:first-child{text-align:left;font-weight:600;font-size:11px;}
+
+/* Verbatim cards */
+.verb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.verb-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:box-shadow .2s;min-width:0;overflow:hidden;max-height:520px;display:flex;flex-direction:column;}
+.verb-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);}
+.verb-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.verb-emoji{font-size:24px;}
+.verb-title{font-size:13px;font-weight:700;}
+.verb-count{font-size:20px;font-weight:800;color:var(--accent);}
+.verb-insight{font-size:11px;color:var(--dim);line-height:1.5;margin:8px 0;padding:8px;background:#f8fafc;border-radius:8px;border-left:3px solid var(--accent);}
+.verb-products{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+.verb-product-tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
+.verb-quotes{margin-top:10px;flex:1;min-height:0;overflow-y:auto;padding-right:4px;}
+.verb-quote{font-size:11px;color:var(--dim);line-height:1.5;padding:8px 10px;background:#fafbff;border-radius:6px;margin-bottom:6px;border-left:2px solid var(--accent2);}
+.verb-quote .q-brand{font-size:10px;color:var(--accent2);font-weight:600;display:block;margin-bottom:2px;}
+
+/* Opportunity cards */
+.opp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.opp-card{background:var(--card);border-radius:14px;padding:20px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.opp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.opp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.opp-brand{font-size:14px;font-weight:700;}
+.opp-review-cnt{font-size:11px;color:var(--dim);}
+.opp-section{margin-bottom:12px;}
+.opp-section-title{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px;}
+.opp-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.opp-tag{font-size:10px;padding:3px 10px;border-radius:10px;font-weight:500;}
+.opp-tag-green{background:rgba(5,150,105,.08);color:var(--pos);}
+.opp-tag-red{background:rgba(220,38,38,.08);color:var(--neg);}
+.opp-tag-blue{background:rgba(37,99,235,.08);color:var(--accent);}
+.opp-tag-purple{background:rgba(30,58,95,.08);color:var(--accent2);}
+.opp-opportunities{margin-top:10px;padding:10px;background:linear-gradient(135deg,rgba(37,99,235,.04),rgba(30,58,95,.04));border-radius:10px;border:1px solid rgba(37,99,235,.1);}
+.opp-idea{font-size:11px;line-height:1.7;color:var(--text);padding:2px 0;}
+.footer{text-align:center;color:var(--dim);font-size:11px;margin-top:48px;padding-top:24px;border-top:1px solid var(--border);}
+
+/* Tab system for deep dive sections */
+.tab-container{margin-bottom:22px;}
+.tab-buttons{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;}
+.tab-btn{padding:8px 18px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit;}
+.tab-btn:hover{border-color:var(--accent);color:var(--accent);}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── Navigation bar ── */
+.top-nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:#1e293b;padding:10px 24px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.nav-btn{padding:6px 14px;border-radius:16px;border:none;background:transparent;font-size:12px;font-weight:500;color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s;font-family:inherit;white-space:nowrap;}
+.nav-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+.nav-btn.active{background:var(--accent);color:#fff;font-weight:600;}
+.section-group{scroll-margin-top:60px;}
+/* ── Tooltips ── */
+.th-tip{position:relative;cursor:help;border-bottom:1px dotted var(--dim);}
+.th-tip .tip-box{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:8px 12px;border-radius:8px;font-size:11px;width:240px;z-index:100;line-height:1.5;font-weight:400;text-transform:none;letter-spacing:0;text-align:left;white-space:normal;box-shadow:0 4px 12px rgba(0,0,0,.15);}
+.th-tip:hover .tip-box{display:block;}
+/* ── Insight box ── */
+.insight-box{margin-top:14px;padding:12px 16px;background:linear-gradient(135deg,rgba(37,99,235,.04),rgba(30,58,95,.04));border:1px solid rgba(37,99,235,.1);border-radius:10px;font-size:12px;line-height:1.8;color:var(--text);}
+.insight-label{font-weight:700;color:var(--accent);margin-bottom:4px;display:block;}
+/* ── Brand filter for opportunity cards ── */
+.brand-filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center;}
+.brand-filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:all .2s;font-family:inherit;}
+.brand-filter-btn:hover{border-color:#94a3b8;background:#f1f5f9;}
+.brand-filter-btn.active{border-color:var(--accent2);background:var(--accent2);color:#fff;}
+@media(max-width:600px){
+  .kpi-row{grid-template-columns:1fr;}
+  .g2,.g3,.mig-grid,.skin-grid{grid-template-columns:1fr;}
+  .detail-grid{grid-template-columns:repeat(2,1fr);}
+  .verb-grid{grid-template-columns:1fr;}
+  .opp-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<nav class="top-nav" id="topNav">
+  <button class="nav-btn active" data-section="sec-insight">인사이트 결론</button>
+  <button class="nav-btn" data-section="sec-overview">제품별 비교</button>
+  <button class="nav-btn" data-section="sec-positioning">경쟁 포지셔닝</button>
+  <button class="nav-btn" data-section="sec-keyword">장단점 키워드</button>
+  <button class="nav-btn" data-section="sec-profile">소비자 프로파일</button>
+  <button class="nav-btn" data-section="sec-retention">재구매·이탈</button>
+  <button class="nav-btn" data-section="sec-migration">브랜드 이동</button>
+  <button class="nav-btn" data-section="sec-verbatim">생생 목소리</button>
+</nav>
+
+<div class="db">
+  <div class="header">
+    <h1>콜로그램 틴트 · Qoo10 경쟁 VOC 딥다이브</h1>
+    <div class="sub" id="subline"></div>
+  </div>
+
+  <!-- 상단 인사이트 결론 -->
+  <div class="section-group" id="sec-insight">
+    <div class="card mkt-card" style="margin-bottom:22px;">
+      <h3>🔎 인사이트 결론</h3>
+      <div class="insight-box" id="verdict" style="font-size:13px;"></div>
+      <div class="g3" style="margin-top:16px;">
+        <div><div class="opp-section-title" style="color:var(--pos);">👍 우리 강점</div><div id="ins-str"></div></div>
+        <div><div class="opp-section-title" style="color:var(--neg);">👎 개선 포인트</div><div id="ins-weak"></div></div>
+        <div><div class="opp-section-title" style="color:var(--accent);">🎯 소재 기획 기회</div><div id="ins-opp"></div></div>
+      </div>
+    </div>
+    <div class="kpi-row" id="kpis"></div>
+  </div>
+
+  <!-- 제품별 비교 -->
+  <div class="section-group" id="sec-overview">
+    <div class="st">제품별 비교 개요</div>
+    <div class="card gf"><table class="comp-table" id="compTable"></table></div>
+  </div>
+
+  <!-- 포지셔닝 -->
+  <div class="section-group" id="sec-positioning">
+    <div class="st">경쟁 포지셔닝 맵 — 지속력 × 자극/보습 순점수</div>
+    <div class="card gf">
+      <canvas id="posChart" style="max-height:420px;"></canvas>
+      <div class="insight-box"><span class="insight-label">읽는 법</span>오른쪽일수록 지속력 호평, 위쪽일수록 순함/보습 우위(자극 단점 적음). 버블 크기=리뷰 수.</div>
+    </div>
+  </div>
+
+  <!-- 장단점 키워드 -->
+  <div class="section-group" id="sec-keyword">
+    <div class="st">장단점 키워드 딥다이브 (브랜드별)</div>
+    <div class="tab-buttons" id="kwTabs"></div>
+    <div class="g2">
+      <div class="card"><h3 style="color:var(--pos);">👍 장점 TOP</h3><div class="kw-bar-container" id="prosBars"></div></div>
+      <div class="card"><h3 style="color:var(--neg);">👎 단점 TOP</h3><div class="kw-bar-container" id="consBars"></div></div>
+    </div>
+  </div>
+
+  <!-- 소비자 프로파일 -->
+  <div class="section-group" id="sec-profile">
+    <div class="st">소비자 프로파일</div>
+    <div class="g2">
+      <div class="card"><h3>입술타입 × 브랜드 구성비</h3><canvas id="lipChart"></canvas></div>
+      <div class="card"><h3>사용 상황 — 언제/어디서</h3><canvas id="usageChart"></canvas></div>
+    </div>
+    <div class="g2">
+      <div class="card"><h3>구매 결정 트리거</h3><canvas id="decisionChart"></canvas></div>
+      <div class="card"><h3>소비자 감성</h3><canvas id="emotionChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- 재구매·이탈 -->
+  <div class="section-group" id="sec-retention">
+    <div class="st">재구매 vs 이탈 시그널</div>
+    <div class="g2">
+      <div class="card"><h3>브랜드별 재구매 · 이탈</h3><div id="retBars"></div></div>
+      <div class="card"><h3>이탈 사유 히트맵 (브랜드 × 사유)</h3><div style="overflow:auto;"><table class="churn-table" id="churnTable"></table></div></div>
+    </div>
+  </div>
+
+  <!-- 브랜드 이동 -->
+  <div class="section-group" id="sec-migration">
+    <div class="st">브랜드간 이동 (전환 패턴)</div>
+    <div class="mig-grid">
+      <div class="card"><h3>이동 패턴 TOP</h3><div id="migList"></div></div>
+      <div class="card"><h3>이동 유저 리뷰 원문</h3><div id="migEx"><div class="mig-placeholder">왼쪽 패턴을 클릭하세요</div></div></div>
+    </div>
+  </div>
+
+  <!-- Verbatim -->
+  <div class="section-group" id="sec-verbatim">
+    <div class="st">소비자 생생 목소리</div>
+    <div class="verb-grid" id="verbGrid"></div>
+  </div>
+
+  <div class="footer" id="footer"></div>
+</div>
+
+<script>
+window.DASH = /*__DASH_DATA__*/null;
+
+(function(){
+  const D = window.DASH;
+  const $ = id => document.getElementById(id);
+  const esc = s => (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  Chart.register(ChartDataLabels);
+  Chart.defaults.font.family = "'Noto Sans KR',sans-serif";
+  Chart.defaults.plugins.datalabels.display = false;
+  const PALETTE = ['#2563eb','#dc2626','#059669','#8b5cf6','#f59e0b','#0ea5e9','#ec4899'];
+
+  if(!D || !D.brands || !D.brands.length){
+    document.querySelector('.db').insertAdjacentHTML('afterbegin',
+      '<div class="card" style="border-color:var(--warn);background:#fffbeb;margin-bottom:20px;">'+
+      '<h3 style="color:var(--warn);">⚠ 데이터가 비어 있습니다</h3>'+
+      '<div style="font-size:13px;color:var(--dim);line-height:1.8;">이 파일은 <b>템플릿</b>입니다. 파이프라인을 실행하면 데이터가 채워집니다:<br>'+
+      '1) <code>python scripts/pipeline_1_crawl.py</code><br>'+
+      '2) <code>GEMINI_API_KEY=... python scripts/pipeline_2_enrich.py</code><br>'+
+      '3) <code>python scripts/pipeline_3_build.py</code> → <code>output/dashboard.html</code></div></div>');
+    return;
+  }
+
+  // ----- 네비게이션 -----
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const el = $(btn.dataset.section);
+      if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    };
+  });
+
+  // ----- 헤더 / KPI -----
+  $('subline').innerHTML = `검색어 <span>${esc(D.meta.keyword)}</span> · 총 <span>${D.meta.total_reviews.toLocaleString()}</span>건 · `+
+    `<span>${D.meta.brand_count}</span>개 브랜드 · 생성 ${esc(D.meta.generated_at)}`;
+  $('kpis').innerHTML = [
+    ['총 리뷰', D.meta.total_reviews.toLocaleString(), '수집·분석 완료'],
+    ['평균 평점', D.meta.avg_rating, '전체 브랜드 평균'],
+    ['분석 브랜드', D.meta.brand_count+'개', (D.meta.our_brand||'')+' vs 경쟁'],
+  ].map(k=>`<div class="kpi"><div class="label">${k[0]}</div><div class="value">${k[1]}</div><div class="note">${esc(k[2])}</div></div>`).join('');
+
+  // ----- 인사이트 -----
+  $('verdict').innerHTML = D.insights.verdict;
+  const liList = arr => arr.map(t=>`<div class="opp-idea">• ${t}</div>`).join('');
+  $('ins-str').innerHTML = liList(D.insights.our_strengths);
+  $('ins-weak').innerHTML = liList(D.insights.our_weaknesses);
+  $('ins-opp').innerHTML = liList(D.insights.opportunities);
+
+  // ----- 비교 테이블 -----
+  $('compTable').innerHTML =
+    '<thead><tr><th>브랜드</th><th>리뷰수</th><th>평균평점</th><th>긍정%</th><th>재구매%</th><th>이탈%</th></tr></thead><tbody>'+
+    D.brands.map(b=>`<tr>
+      <td><span class="brand-cell"><span class="dot" style="background:${b.color}"></span>${esc(b.name)}${b.is_ours?' <span class="badge badge-green">우리</span>':''}</span></td>
+      <td class="num">${b.review_count.toLocaleString()}</td>
+      <td class="num"><span class="star">★</span> ${b.avg_rating}</td>
+      <td class="num">${b.pos_pct}%</td>
+      <td class="num">${b.repurchase_pct}%</td>
+      <td class="num">${b.churn_pct}%</td></tr>`).join('')+'</tbody>';
+
+  // ----- 포지셔닝 산점도 -----
+  new Chart($('posChart'),{
+    type:'bubble',
+    data:{datasets:D.positioning.map(p=>({label:p.brand,
+      data:[{x:p.x,y:p.y,r:Math.max(8,Math.sqrt(p.size)*1.6)}],
+      backgroundColor:p.color+'cc',borderColor:p.color}))},
+    options:{plugins:{legend:{position:'bottom'},
+      datalabels:{display:true,formatter:(v,ctx)=>ctx.dataset.label,color:'#1e293b',font:{weight:600,size:11},anchor:'center'},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: 지속력 ${c.raw.x} / 순점수 ${c.raw.y}`}}},
+      scales:{x:{title:{display:true,text:'지속력 호평률 (%) →'},grid:{color:'#f1f5f9'}},
+              y:{title:{display:true,text:'순함·보습 순점수 →'},grid:{color:'#f1f5f9'}}}}
+  });
+
+  // ----- 장단점 키워드 (탭) -----
+  const kwBrands = D.brands.map(b=>b.name);
+  let curKw = (D.brands.find(b=>b.is_ours)||D.brands[0]).name;
+  $('kwTabs').innerHTML = kwBrands.map(n=>`<button class="tab-btn${n===curKw?' active':''}" data-b="${esc(n)}">${esc(n)}</button>`).join('');
+  function kwBars(container, list, color){
+    const max = Math.max(1,...list.map(x=>x.count));
+    container.innerHTML = list.length? list.map((x,i)=>`
+      <div class="kw-bar-item" data-i="${i}">
+        <div class="kw-bar-row">
+          <div class="kw-label">${esc(x.kw)}</div>
+          <div class="kw-track"><div class="kw-fill" style="width:${x.count/max*100}%;background:${color}">${x.count}</div></div>
+          <div class="kw-count">${x.count}건</div>
+        </div>
+        <div class="kw-details">${(x.samples||[]).map(s=>`<div class="kw-sample-item"><span class="kw-sample-rating">${'★'.repeat(s.rating||0)}</span><span class="kw-sample-text">${esc(s.text)}</span></div>`).join('')||'<span class="dim">샘플 없음</span>'}</div>
+      </div>`).join('') : '<div class="dim" style="font-size:12px;">키워드 없음</div>';
+    container.querySelectorAll('.kw-bar-item').forEach(it=>it.onclick=()=>it.querySelector('.kw-details').classList.toggle('open'));
+  }
+  function renderKw(){
+    kwBars($('prosBars'), D.pros_by_brand[curKw]||[], 'var(--pos)');
+    kwBars($('consBars'), D.cons_by_brand[curKw]||[], 'var(--neg)');
+  }
+  $('kwTabs').querySelectorAll('.tab-btn').forEach(btn=>btn.onclick=()=>{
+    curKw=btn.dataset.b;
+    $('kwTabs').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); renderKw();
+  });
+  renderKw();
+
+  // ----- 입술타입 stacked -----
+  new Chart($('lipChart'),{type:'bar',
+    data:{labels:D.lip_type.labels,
+      datasets:D.brands.map((b,i)=>({label:b.name,data:D.lip_type.by_brand[b.name]||[],backgroundColor:b.color}))},
+    options:{plugins:{legend:{position:'bottom'}},responsive:true,
+      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}});
+
+  // ----- 도넛/바 헬퍼 -----
+  function donut(canvasId, items){
+    if(!items||!items.length){return;}
+    new Chart($(canvasId),{type:'doughnut',
+      data:{labels:items.map(x=>x.label),datasets:[{data:items.map(x=>x.count),
+        backgroundColor:items.map((_,i)=>PALETTE[i%PALETTE.length])}]},
+      options:{plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},
+        datalabels:{display:true,color:'#fff',font:{size:10,weight:600},
+          formatter:(v,c)=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);const p=Math.round(v/t*100);return p>=6?p+'%':'';}}}}});
+  }
+  function hbar(canvasId, items, color){
+    if(!items||!items.length){return;}
+    new Chart($(canvasId),{type:'bar',
+      data:{labels:items.map(x=>x.label),datasets:[{data:items.map(x=>x.count),backgroundColor:color}]},
+      options:{indexAxis:'y',plugins:{legend:{display:false},
+        datalabels:{display:true,anchor:'end',align:'end',color:'#475569',font:{size:10}}},
+        scales:{x:{grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}}});
+  }
+  donut('usageChart', D.usage);
+  hbar('decisionChart', D.decision, '#2563eb');
+  donut('emotionChart', D.emotion);
+
+  // ----- 재구매/이탈 바 -----
+  $('retBars').innerHTML = D.retention.map(r=>{
+    const tot = r.repurchase+r.churn+r.neutral||1;
+    return `<div class="ret-row"><div class="ret-label">${esc(r.brand)}</div>
+      <div class="ret-bars">
+        <div class="ret-bar" style="width:${r.repurchase/tot*100}%;background:var(--pos)" title="재구매 ${r.repurchase}">${r.repurchase||''}</div>
+        <div class="ret-bar" style="width:${r.neutral/tot*100}%;background:#cbd5e1;color:#475569" title="중립 ${r.neutral}">${r.neutral||''}</div>
+        <div class="ret-bar" style="width:${r.churn/tot*100}%;background:var(--neg)" title="이탈 ${r.churn}">${r.churn||''}</div>
+      </div><div class="ret-ratio">${r.ratio}:1</div></div>`;
+  }).join('');
+
+  // ----- 이탈 사유 히트맵 -----
+  const reasons = D.churn.reasons;
+  const maxC = Math.max(1,...D.churn.matrix.flatMap(m=>m.counts));
+  $('churnTable').innerHTML =
+    '<thead><tr><th>브랜드</th>'+reasons.map(r=>`<th>${esc(r)}</th>`).join('')+'</tr></thead><tbody>'+
+    D.churn.matrix.map(m=>`<tr><td>${esc(m.brand)}</td>`+
+      m.counts.map(c=>{const a=c/maxC;return `<td><span class="hm-cell" style="background:rgba(220,38,38,${a*0.85+0.04});color:${a>0.5?'#fff':'#475569'}">${c||''}</span></td>`;}).join('')+'</tr>').join('')+'</tbody>';
+
+  // ----- 브랜드 이동 -----
+  if(D.migration.length){
+    $('migList').innerHTML = D.migration.map((m,i)=>`<div class="mig-row" data-i="${i}"><span class="mig-pattern">${esc(m.pattern)}<span class="cnt">${m.count}건</span></span></div>`).join('');
+    $('migList').querySelectorAll('.mig-row').forEach(row=>row.onclick=()=>{
+      $('migList').querySelectorAll('.mig-row').forEach(r=>r.classList.remove('active'));
+      row.classList.add('active');
+      const m=D.migration[+row.dataset.i];
+      $('migEx').innerHTML = m.examples.length? m.examples.map(e=>`<div class="mig-example"><span class="ex-brand">${esc(e.brand)}</span><span class="ex-text">${esc(e.text)}</span></div>`).join('') : '<div class="mig-placeholder">예시 없음</div>';
+    });
+  } else { $('migList').innerHTML='<div class="mig-placeholder">전환 언급 리뷰가 없습니다</div>'; }
+
+  // ----- Verbatim -----
+  $('verbGrid').innerHTML = D.verbatim.map(v=>`
+    <div class="verb-card">
+      <div class="verb-header"><span class="verb-emoji">${v.emoji}</span><span class="verb-title">${esc(v.title)}</span><span class="verb-count" style="margin-left:auto;color:${v.color}">${v.count}</span></div>
+      <div class="verb-quotes">${v.quotes.map(q=>`<div class="verb-quote"><span class="q-brand">${esc(q.brand)} · ${'★'.repeat(q.rating||0)}</span>${esc(q.text)}</div>`).join('')||'<div class="dim">샘플 없음</div>'}</div>
+    </div>`).join('');
+
+  $('footer').innerHTML = `Qoo10 Japan VOC 분석 · ${esc(D.meta.keyword)} · ${D.meta.total_reviews.toLocaleString()}건 · 생성 ${esc(D.meta.generated_at)}`;
+})();
+</script>
+</body>
+</html>

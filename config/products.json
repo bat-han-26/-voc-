@@ -1,0 +1,49 @@
+{
+  "_comment": "콜로그램 + 경쟁 틴트 브랜드 설정. Qoo10 상품 gd_no 를 채우세요. (URL https://www.qoo10.jp/g/<gd_no> 의 숫자)",
+  "keyword": "colorgram ティント",
+  "brands": [
+    {
+      "name": "콜로그램",
+      "name_en": "colorgram",
+      "color": "#2563eb",
+      "is_ours": true,
+      "product_ids": ["1057459512", "1135003693", "1036494829"]
+    },
+    {
+      "name": "롬앤",
+      "name_en": "romand",
+      "color": "#dc2626",
+      "is_ours": false,
+      "product_ids": []
+    },
+    {
+      "name": "페리페라",
+      "name_en": "peripera",
+      "color": "#059669",
+      "is_ours": false,
+      "product_ids": []
+    },
+    {
+      "name": "3CE",
+      "name_en": "3ce",
+      "color": "#8b5cf6",
+      "is_ours": false,
+      "product_ids": []
+    },
+    {
+      "name": "릴리바이레드",
+      "name_en": "lilybyred",
+      "color": "#f59e0b",
+      "is_ours": false,
+      "product_ids": []
+    }
+  ],
+  "dimensions": {
+    "_comment": "틴트 카테고리에 맞춘 분석 차원 라벨. enrich 프롬프트와 dashboard 라벨에 사용.",
+    "lip_type": ["건조", "민감", "복합", "일반"],
+    "usage_situation": ["데일리", "직장/학교", "데이트/외출", "특별한날", "여름/땀", "겨울/건조", "마스크"],
+    "purchase_decision": ["인플루언서/유튜브", "SNS/광고", "지인추천", "패키지/디자인", "가격/할인", "리뷰/평점", "재구매"],
+    "purchase_motive": ["데일리메이크업", "색상탐색", "선물", "트렌드", "립케어겸용"],
+    "churn_reason": ["건조함", "입술자극", "색상불만", "지속력부족", "가격부담", "향/맛", "발림성"]
+  }
+}

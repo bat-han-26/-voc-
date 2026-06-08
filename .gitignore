@@ -1,0 +1,9 @@
+# 파이프라인 생성 산출물 (코드만 버전관리)
+data/reviews_raw.csv
+data/reviews_enriched.jsonl
+data/review_result.csv
+data/_demo.jsonl
+output/
+__pycache__/
+*.pyc
+.env
