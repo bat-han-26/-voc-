@@ -320,7 +320,7 @@ window.DASH = /*__DASH_DATA__*/null;
       <h3 style="font-size:15px;">${esc(p.brand)} · ${esc(p.product)} <span class="cat-chip">${esc(p.category)}</span>
         <span class="dim" style="font-weight:400;font-size:11px;margin-left:6px;">${p.count.toLocaleString()}건 · ★${p.avg} · 긍정 ${p.pos_pct}%</span></h3>
       <div class="g3" style="margin-bottom:6px;">
-        <div><div class="opp-section-title">📊 핵심 니즈 (언급률, 번역 ${p.trans_n.toLocaleString()}건 기준)</div>${needBars||'<span class="dim">-</span>'}</div>
+        <div><div class="opp-section-title">📊 핵심 니즈 (언급률, 전체 ${(p.needs_basis||p.count).toLocaleString()}건·한·일 원문 기준)</div>${needBars||'<span class="dim">-</span>'}</div>
         <div><div class="opp-section-title" style="color:var(--accent);">🧩 도출 결론</div><ul style="margin:0;padding-left:16px;font-size:12px;line-height:1.6;">${li(s.conclusion)}</ul></div>
         <div><div class="opp-section-title" style="color:var(--pos);">🎬 마이크로 인플루언서 UGC 적용</div><ul style="margin:0;padding-left:16px;font-size:12px;line-height:1.6;">${li(s.ugc)}</ul></div>
       </div>
