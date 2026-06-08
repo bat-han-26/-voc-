@@ -214,6 +214,7 @@ def make_insights(brands, our, pros, cons, retention, churn_matrix, reasons):
     verdict = "데이터가 부족합니다. 크롤링/강화 단계를 먼저 실행하세요."
     if ours and comp:
         avg_comp = sum(b["avg_rating"] for b in comp) / len(comp)
+        avg_comp_rep = sum(b["repurchase_pct"] for b in comp) / len(comp)
         rank = sorted(brands, key=lambda b: -b["avg_rating"]).index(ours) + 1
         verdict = (f"<b>{our}</b>는 평균 평점 <b>{ours['avg_rating']}점</b>으로 "
                    f"분석 {len(brands)}개 브랜드 중 <b>{rank}위</b>입니다 "
@@ -223,8 +224,10 @@ def make_insights(brands, our, pros, cons, retention, churn_matrix, reasons):
         top_pro = (pros.get(our) or [{}])[0].get("kw")
         if top_pro:
             strengths.append(f"최대 강점 키워드: <b>{top_pro}</b> — 마케팅 메인 카피로 활용")
-        if ours["repurchase_pct"] >= avg_comp:
-            strengths.append(f"재구매 의향 {ours['repurchase_pct']}% — 충성 고객 기반 확보")
+        if ours["repurchase_pct"] >= avg_comp_rep:
+            strengths.append(f"재구매 의향 {ours['repurchase_pct']}% — 경쟁 평균({round(avg_comp_rep,1)}%) 이상, 충성 기반 확보")
+        else:
+            weaknesses.append(f"재구매 의향 {ours['repurchase_pct']}% — 경쟁 평균({round(avg_comp_rep,1)}%) 대비 낮음, 충성도 강화 필요")
         top_con = (cons.get(our) or [{}])[0].get("kw")
         if top_con:
             weaknesses.append(f"최다 단점 키워드: <b>{top_con}</b> — 제품/소구 개선 1순위")
