@@ -146,20 +146,6 @@ def build(rows, cfg):
         c = Counter(x.get("churn_reason") for x in rs if x.get("churn_reason") in reasons)
         churn_matrix.append({"brand": b["name"], "counts": [c.get(r, 0) for r in reasons]})
 
-    # ---- 브랜드 이동(전환) ----
-    mig = Counter()
-    mig_ex = defaultdict(list)
-    for x in rows:
-        frm, to = x.get("switch_from"), x.get("switch_to")
-        if frm or to:
-            pat = f"{frm or '?'} → {to or x.get('brand') or '?'}"
-            mig[pat] += 1
-            if len(mig_ex[pat]) < 3:
-                t = x.get("review_kr") or x.get("review_content_jp")
-                if t:
-                    mig_ex[pat].append({"brand": x.get("brand"), "text": t[:140]})
-    migration = [{"pattern": p, "count": c, "examples": mig_ex[p]} for p, c in mig.most_common(10)]
-
     # ---- Verbatim (감성 테마별 카드) ----
     themes = [
         ("positive", "😍", "강한 만족", "var(--pos)"),
@@ -202,7 +188,6 @@ def build(rows, cfg):
         "usage": usage, "emotion": emotion, "decision": decision, "motive": motive,
         "retention": retention,
         "churn": {"reasons": reasons, "matrix": churn_matrix},
-        "migration": migration,
         "verbatim": verbatim,
     }
 

@@ -166,9 +166,6 @@ def main():
                 "purchase_decision": random.sample(DEC, random.randint(1, 2)),
                 "purchase_motive": random.choice(MOT),
                 "repurchase_intent": intent, "churn_reason": churn,
-                "switch_from": (random.choice([b for b in BRAND_FACTS if b != brand])
-                                if random.random() < 0.18 else None),
-                "switch_to": brand if random.random() < 0.14 else None,
                 "pros_keywords": pros, "cons_keywords": cons,
                 "verbatim_worthy": random.random() < 0.5,
             })

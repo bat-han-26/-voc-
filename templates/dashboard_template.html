@@ -203,7 +203,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <button class="nav-btn" data-section="sec-keyword">장단점 키워드</button>
   <button class="nav-btn" data-section="sec-profile">소비자 프로파일</button>
   <button class="nav-btn" data-section="sec-retention">재구매·이탈</button>
-  <button class="nav-btn" data-section="sec-migration">브랜드 이동</button>
   <button class="nav-btn" data-section="sec-verbatim">생생 목소리</button>
 </nav>
 
@@ -271,15 +270,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     <div class="g2">
       <div class="card"><h3>브랜드별 재구매 · 이탈</h3><div id="retBars"></div></div>
       <div class="card"><h3>이탈 사유 히트맵 (브랜드 × 사유)</h3><div style="overflow:auto;"><table class="churn-table" id="churnTable"></table></div></div>
-    </div>
-  </div>
-
-  <!-- 브랜드 이동 -->
-  <div class="section-group" id="sec-migration">
-    <div class="st">브랜드간 이동 (전환 패턴)</div>
-    <div class="mig-grid">
-      <div class="card"><h3>이동 패턴 TOP</h3><div id="migList"></div></div>
-      <div class="card"><h3>이동 유저 리뷰 원문</h3><div id="migEx"><div class="mig-placeholder">왼쪽 패턴을 클릭하세요</div></div></div>
     </div>
   </div>
 
@@ -440,17 +430,6 @@ window.DASH = /*__DASH_DATA__*/null;
     '<thead><tr><th>브랜드</th>'+reasons.map(r=>`<th>${esc(r)}</th>`).join('')+'</tr></thead><tbody>'+
     D.churn.matrix.map(m=>`<tr><td>${esc(m.brand)}</td>`+
       m.counts.map(c=>{const a=c/maxC;return `<td><span class="hm-cell" style="background:rgba(220,38,38,${a*0.85+0.04});color:${a>0.5?'#fff':'#475569'}">${c||''}</span></td>`;}).join('')+'</tr>').join('')+'</tbody>';
-
-  // ----- 브랜드 이동 -----
-  if(D.migration.length){
-    $('migList').innerHTML = D.migration.map((m,i)=>`<div class="mig-row" data-i="${i}"><span class="mig-pattern">${esc(m.pattern)}<span class="cnt">${m.count}건</span></span></div>`).join('');
-    $('migList').querySelectorAll('.mig-row').forEach(row=>row.onclick=()=>{
-      $('migList').querySelectorAll('.mig-row').forEach(r=>r.classList.remove('active'));
-      row.classList.add('active');
-      const m=D.migration[+row.dataset.i];
-      $('migEx').innerHTML = m.examples.length? m.examples.map(e=>`<div class="mig-example"><span class="ex-brand">${esc(e.brand)}</span><span class="ex-text">${esc(e.text)}</span></div>`).join('') : '<div class="mig-placeholder">예시 없음</div>';
-    });
-  } else { $('migList').innerHTML='<div class="mig-placeholder">전환 언급 리뷰가 없습니다</div>'; }
 
   // ----- Verbatim -----
   $('verbGrid').innerHTML = D.verbatim.map(v=>`
