@@ -225,6 +225,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
       <h3>🔎 인사이트 결론 <span class="fact-badge">100% 실데이터</span></h3>
       <div class="insight-box"><ul id="insightList" style="margin:0;padding-left:18px;line-height:2;"></ul></div>
     </div>
+
+    <div class="card mkt-card" style="margin-bottom:18px;">
+      <h3>🧭 VOC 전략 결론 <span class="fact-badge">실데이터 도출</span></h3>
+      <div class="insight-box"><ul id="overallList" style="margin:0;padding-left:18px;line-height:2;"></ul></div>
+    </div>
+    <div class="st">제품별 전략 브리프 — 결론 / UGC 적용 / 고객 니즈·실제 언어</div>
+    <div id="strategyCards" style="margin-bottom:22px;"></div>
+
     <div class="st" style="margin-top:8px;">제품별 VOC 인사이트 요약</div>
     <div class="g3" id="vocSummary"></div>
     <div class="kpi-row" id="kpis"></div>
@@ -294,6 +302,32 @@ window.DASH = /*__DASH_DATA__*/null;
   $('subline').innerHTML = `검색어 <span>colorgram ティント</span> · 실제 Qoo10 리뷰 <span>${D.meta.total.toLocaleString()}</span>건 · `+
     `브랜드 <span>${D.meta.brand_count}</span> · 제품 <span>${D.meta.product_count}</span> · 기간 ${D.meta.date_min} ~ ${D.meta.date_max}`;
   $('insightList').innerHTML = D.insights.map(t=>`<li>${t}</li>`).join('');
+
+  // ===== VOC 전략 결론 (overall) =====
+  $('overallList').innerHTML = (D.overall||[]).map(t=>`<li style="margin-bottom:4px;">${t}</li>`).join('');
+
+  // ===== 제품별 전략 브리프 =====
+  $('strategyCards').innerHTML = D.products.map(p=>{
+    const s=p.strategy||{}; const needs=(p.needs||[]).slice(0,7);
+    const maxN=Math.max(1,...needs.map(x=>x.count));
+    const needBars = needs.map(x=>`<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:11px;">
+        <div style="width:96px;text-align:right;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(x.need)}</div>
+        <div style="flex:1;height:14px;background:#f1f5f9;border-radius:4px;overflow:hidden;"><div style="width:${x.count/maxN*100}%;height:100%;background:${p.color};"></div></div>
+        <div style="width:42px;text-align:right;color:var(--dim);">${x.pct}%</div></div>`).join('');
+    const langChips = (s.language||[]).map(w=>`<span class="opp-tag opp-tag-purple" style="margin:2px;">“${esc(w)}”</span>`).join('');
+    const li = arr => (arr||[]).map(t=>`<li style="margin-bottom:6px;">${t}</li>`).join('');
+    return `<div class="card" style="margin-bottom:16px;border-left:4px solid ${p.color};">
+      <h3 style="font-size:15px;">${esc(p.brand)} · ${esc(p.product)} <span class="cat-chip">${esc(p.category)}</span>
+        <span class="dim" style="font-weight:400;font-size:11px;margin-left:6px;">${p.count.toLocaleString()}건 · ★${p.avg} · 긍정 ${p.pos_pct}%</span></h3>
+      <div class="g3" style="margin-bottom:6px;">
+        <div><div class="opp-section-title">📊 핵심 니즈 (언급률, 번역 ${p.trans_n.toLocaleString()}건 기준)</div>${needBars||'<span class="dim">-</span>'}</div>
+        <div><div class="opp-section-title" style="color:var(--accent);">🧩 도출 결론</div><ul style="margin:0;padding-left:16px;font-size:12px;line-height:1.6;">${li(s.conclusion)}</ul></div>
+        <div><div class="opp-section-title" style="color:var(--pos);">🎬 마이크로 인플루언서 UGC 적용</div><ul style="margin:0;padding-left:16px;font-size:12px;line-height:1.6;">${li(s.ugc)}</ul></div>
+      </div>
+      <div class="opp-opportunities"><div class="opp-section-title" style="color:var(--accent2);">🗣️ 고객이 실제 쓰는 언어 (UGC 카피 차용)</div>
+        <div style="margin-top:4px;">${langChips}</div></div>
+    </div>`;
+  }).join('');
 
   // ===== 제품별 VOC 인사이트 요약 카드 =====
   const chips = (arr,cls)=> (arr&&arr.length)? arr.map(w=>`<span class="opp-tag ${cls}">${esc(w)}</span>`).join('') : '<span class="dim" style="font-size:11px;">표본 적음</span>';
