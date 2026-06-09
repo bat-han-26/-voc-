@@ -110,3 +110,37 @@ python scripts/pipeline_3_build.py            # 대시보드 생성
 
 이 클라우드 실행 환경은 네트워크 정책상 `qoo10.jp` 접근이 차단되어 있어 크롤러를
 환경 내에서 직접 실행할 수 없습니다. 크롤링은 로컬 환경에서 수행 후 CSV만 업로드하세요.
+
+---
+
+## 다른 소스로 복제하기 — 올리브영(국내) 등
+
+대시보드 분석/렌더는 소스 무관하게 재사용됩니다. 새 소스는 **수집기 + 설정**만 추가하면 됩니다.
+
+### 올리브영 올더베러 VOC (예시)
+```bash
+pip install -r requirements.txt
+# 1) config/oliveyoung_products.json 의 goodsNo(상품번호) 채우기
+#    (상세 URL .../getGoodsDetail.do?goodsNo=AXXXXXXXXX 의 값)
+# 2) 로컬에서 리뷰 수집 (이 클라우드 환경은 oliveyoung.co.kr 차단)
+python scripts/oliveyoung_crawler.py --config config/oliveyoung_products.json \
+    --out data/oliveyoung_reviews.csv
+# 3) 동일 포맷 대시보드 생성 (설정 기반 범용 빌더, 전략 자동 생성)
+python scripts/build_voc_dashboard.py \
+    --in data/oliveyoung_reviews.csv --config config/oliveyoung_products.json \
+    --out oliveyoung_allthebetter_dashboard.html
+```
+
+### 구성요소
+| 경로 | 설명 |
+|------|------|
+| `scripts/oliveyoung_crawler.py` | 올리브영 구매후기(GDAS) 크롤러 — 표준 스키마 CSV 출력 (로컬 실행, 한국어=번역 불필요) |
+| `config/oliveyoung_products.json` | 제품(goodsNo)·카테고리·**니즈 사전(concepts)**·평가축 설정 |
+| `scripts/build_voc_dashboard.py` | **범용(설정 기반) 빌더** — concepts/satisfaction을 config에서 읽고 제품별 전략 브리프를 데이터에서 자동 생성 |
+
+### 새 브랜드/카테고리로 확장하는 법
+1. `config/<source>_products.json` 복제 → `products`(id↔브랜드/제품/카테고리)와 `concepts`(카테고리 맞춤 니즈 사전) 작성
+2. 해당 사이트 수집기로 표준 스키마 CSV 생성 (컬럼: `product_id, brand, product_name, category, rating, review_date, option, review_content, review_content_kr`)
+3. `python scripts/build_voc_dashboard.py --in <csv> --config <config> --out <html>`
+
+> 참고: 올리브영은 마크업이 바뀌면 `oliveyoung_crawler.py`의 `SELECTORS`만 실제 페이지에 맞게 조정하세요. 전략 브리프는 데이터에서 자동 생성되며, 실데이터 확보 후 문구를 다듬을 수 있습니다.
