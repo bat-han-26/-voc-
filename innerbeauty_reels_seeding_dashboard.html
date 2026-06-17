@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>이너뷰티·웰니스 인스타 릴스 시딩 대시보드 — 뷰티 버전</title>
+<style>
+  :root{
+    --bg:#fbf7fb; --bg2:#f4ecf6; --panel:#ffffff; --line:#efe2ee;
+    --txt:#2c2230; --muted:#8c7d92; --soft:#b6a6bd;
+    --rose:#e85a8a; --rose2:#ff8fb3; --lav:#9b6dff; --lav2:#c2a3ff;
+    --gold:#e8a13c; --mint:#36c6a8; --bad:#ef5a6f;
+    --grad:linear-gradient(110deg,#ff8fb3,#9b6dff 55%,#7aa8ff);
+    --shadow:0 10px 34px rgba(155,109,255,.12);
+    --shadow2:0 4px 16px rgba(232,90,138,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:
+     radial-gradient(900px 420px at 88% -8%,rgba(255,143,179,.18),transparent),
+     radial-gradient(800px 420px at 6% 4%,rgba(155,109,255,.14),transparent),
+     var(--bg);color:var(--txt);
+    font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1240px;margin:0 auto;padding:30px 22px 90px}
+  a{color:var(--lav);text-decoration:none} a:hover{text-decoration:underline}
+
+  header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;justify-content:space-between;margin-bottom:14px}
+  .title h1{margin:0;font-size:25px;letter-spacing:-.4px;line-height:1.25}
+  .title .bt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+  .title p{margin:8px 0 0;color:var(--muted);font-size:12.5px;max-width:760px;line-height:1.55}
+  .badge{display:inline-block;font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px;
+    background:linear-gradient(90deg,rgba(255,143,179,.18),rgba(155,109,255,.18));color:var(--rose);border:1px solid rgba(232,90,138,.25)}
+
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:13px;margin:20px 0 8px}
+  @media(max-width:980px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px 16px;box-shadow:var(--shadow2);position:relative;overflow:hidden}
+  .kpi::after{content:"";position:absolute;right:-20px;top:-20px;width:70px;height:70px;border-radius:50%;background:var(--grad);opacity:.07}
+  .kpi .lab{font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.2px}
+  .kpi .val{font-size:25px;font-weight:900;margin-top:6px;letter-spacing:-.5px}
+  .kpi .sub{font-size:11px;color:var(--soft);margin-top:3px}
+
+  .insight{background:linear-gradient(135deg,#fff,#fdf3f8 70%);border:1px solid var(--line);
+    border-radius:20px;padding:22px 24px;box-shadow:var(--shadow);margin:22px 0 26px;position:relative;overflow:hidden}
+  .insight::before{content:"";position:absolute;inset:0;background:radial-gradient(560px 200px at 92% -30%,rgba(155,109,255,.12),transparent)}
+  .insight h2{margin:0 0 4px;font-size:18px;display:flex;align-items:center;gap:9px;position:relative}
+  .insight .sub{color:var(--muted);font-size:12px;margin-bottom:15px;position:relative}
+  .verdict{position:relative;font-size:14.5px;line-height:1.65;background:rgba(155,109,255,.05);
+    border:1px solid var(--line);border-radius:13px;padding:15px 17px;margin-bottom:16px}
+  .verdict b{color:var(--rose)}
+  .icols{display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative}
+  @media(max-width:820px){.icols{grid-template-columns:1fr}}
+  .ibox h4{margin:0 0 8px;font-size:12px;letter-spacing:.5px;color:var(--muted);font-weight:800}
+  .ibox ul{margin:0;padding:0;list-style:none}
+  .ibox li{font-size:13px;line-height:1.5;padding:7px 0 7px 22px;position:relative;border-bottom:1px dashed var(--line)}
+  .ibox li:last-child{border-bottom:none}
+  .ibox li::before{position:absolute;left:0;top:7px;font-size:12px}
+  .ibox.pos li::before{content:"\2728";} .ibox.neg li::before{content:"\26A0\FE0F";}
+
+  .sec{margin:30px 0 12px}
+  .sec h3{font-size:16px;margin:0 0 3px;display:flex;align-items:center;gap:8px}
+  .sec p{margin:0;color:var(--muted);font-size:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow2)}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:10px 9px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.2px;cursor:pointer;user-select:none}
+  th:first-child,td:first-child{text-align:left}
+  th.sortable:hover{color:var(--rose)}
+  tbody tr:hover{background:#fdf4f8}
+  td.bn{font-weight:800}
+  .chip{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:middle}
+  .bar{position:relative;height:9px;border-radius:6px;background:#f0e8f1;overflow:hidden;min-width:60px}
+  .bar > i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--grad)}
+  .mut{color:var(--muted);font-size:11.5px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:880px){.grid2{grid-template-columns:1fr}}
+  .chart-row{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:12.5px}
+  .chart-row .nm{width:78px;flex:none;font-weight:700}
+  .chart-row .tr{flex:1;height:18px;border-radius:7px;background:#f0e8f1;position:relative;overflow:hidden}
+  .chart-row .tr > i{position:absolute;left:0;top:0;bottom:0;border-radius:7px;background:var(--grad)}
+  .chart-row .vv{width:88px;flex:none;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+
+  .stack{display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+  .stack > span{height:100%}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:11.5px;color:var(--muted)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+
+  .spark{display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:8px}
+  .spark > i{flex:1;background:var(--grad);border-radius:4px 4px 0 0;min-height:2px;opacity:.85;transition:.2s}
+  .spark > i:hover{opacity:1}
+  .xlab{display:flex;justify-content:space-between;font-size:10px;color:var(--soft);margin-top:5px}
+
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(155,109,255,.1);color:var(--lav)}
+  .tag.g{background:rgba(54,198,168,.12);color:#1f9c83}
+  .tag.r{background:rgba(232,90,138,.12);color:var(--rose)}
+  .footer{margin-top:36px;color:var(--soft);font-size:11.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+  .cap{max-width:300px;white-space:normal;font-size:11px;color:var(--muted);line-height:1.4}
+  .scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="title">
+      <span class="badge">BEAUTY VERSION · 인플루언서 시딩 분석</span>
+      <h1><span class="bt">이너뷰티 · 웰니스</span> 인스타그램 릴스 시딩 대시보드</h1>
+      <p>올리브영 올더베러 제안용 — 6개 경쟁/레퍼런스 브랜드의 인스타 릴스(clips) 수집 데이터 기반.
+         ScrapeCreators 해시태그·릴스 검색을 6개 기간별 수집 후 shortcode 중복 제거(합집합).
+         시딩 판정 = 유료 파트너십 플래그 <b>OR</b> 캡션 협찬 키워드(광고/협찬/제품제공/체험단 등).</p>
+    </div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="insight">
+    <h2>💄 한눈에 보는 결론</h2>
+    <div class="sub">실제 수집 수치 기반 자동 요약 · 평균 재생수(plays) 기준 정렬</div>
+    <div class="verdict" id="verdict"></div>
+    <div class="icols">
+      <div class="ibox pos"><h4>잘 되고 있는 시그널</h4><ul id="pos"></ul></div>
+      <div class="ibox neg"><h4>점검 포인트</h4><ul id="neg"></ul></div>
+    </div>
+  </div>
+
+  <div class="sec"><h3>🏆 브랜드별 시딩 성과 비교</h3><p>열 제목 클릭 시 정렬. 재생수(plays)는 인스타 릴스의 노출 지표, 조회수(views)는 일부 미제공(-1 제외).</p></div>
+  <div class="card scroll">
+    <table id="btable">
+      <thead><tr id="bhead"></tr></thead>
+      <tbody id="bbody"></tbody>
+    </table>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="card">
+      <div class="sec" style="margin:0 0 6px"><h3>📈 평균 재생수 (브랜드)</h3><p>릴스당 평균 plays</p></div>
+      <div id="chartPlays"></div>
+    </div>
+    <div class="card">
+      <div class="sec" style="margin:0 0 6px"><h3>🎯 시딩률 (브랜드)</h3><p>전체 릴스 중 협찬 릴스 비중</p></div>
+      <div id="chartSeed"></div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="card">
+      <div class="sec" style="margin:0 0 6px"><h3>💞 중앙값 인게이지먼트율 (브랜드)</h3><p>(좋아요+댓글)/팔로워 — 평균은 초소형 계정 이상치 영향이 커 중앙값 사용</p></div>
+      <div id="chartER"></div>
+    </div>
+    <div class="card">
+      <div class="sec" style="margin:0 0 6px"><h3>👥 인플루언서 등급 믹스 (전체)</h3><p>팔로워 기준 등급 분포</p></div>
+      <div id="tierStack"></div>
+      <div class="legend" id="tierLegend"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <div class="sec" style="margin:0 0 6px"><h3>🗓️ 월별 시딩 릴스 발행 추이</h3><p>협찬 릴스 발행량(전 브랜드 합산) — 시딩 집행이 본격화된 2023-07 이후</p></div>
+    <div class="spark" id="spark"></div>
+    <div class="xlab" id="sparkx"></div>
+  </div>
+
+  <div class="sec"><h3>⭐ TOP 시딩 릴스 (재생수 상위 15)</h3><p>가장 멀리 퍼진 협찬 릴스 — 어떤 등급·포맷이 통했는지 레퍼런스</p></div>
+  <div class="card scroll">
+    <table id="ttable">
+      <thead><tr>
+        <th style="text-align:left">브랜드</th><th style="text-align:left">인플루언서</th>
+        <th>등급</th><th>팔로워</th><th>발행일</th><th>길이</th>
+        <th>재생수</th><th>조회수</th><th>좋아요</th><th>댓글</th><th style="text-align:left">캡션</th><th>링크</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer" id="foot"></div>
+</div>
+
+<script>
+const D = {"overall": {"posts": 4327, "seed": 1384, "seed_rate": 32.0, "paid": 290, "avg_foll": 73432, "med_foll": 9496, "sum_likes": 2289692, "avg_likes": 646, "sum_comts": 125051, "avg_comts": 28, "sum_views": 52391122, "avg_views": 12169, "med_views": 686, "views_n": 4305, "sum_plays": 194641841, "avg_plays": 45669, "avg_dur": 43.2, "verified_rate": 23.2, "grades": {"메가": 66, "매크로": 619, "마이크로": 1444, "나노": 1230, "나노미만": 968}, "avg_er": 16.75, "med_er": 0.8, "months": {"2018-03": 1, "2019-11": 1, "2020-05": 1, "2020-09": 1, "2021-01": 1, "2021-02": 1, "2021-03": 1, "2021-05": 1, "2021-08": 1, "2021-10": 3, "2021-12": 2, "2022-03": 1, "2022-04": 2, "2022-06": 2, "2022-07": 11, "2022-08": 3, "2022-09": 5, "2022-11": 1, "2022-12": 1, "2023-01": 2, "2023-03": 1, "2023-04": 2, "2023-05": 1, "2023-07": 6, "2023-08": 8, "2023-09": 5, "2023-10": 1, "2023-11": 5, "2023-12": 4, "2024-01": 3, "2024-02": 6, "2024-03": 6, "2024-04": 5, "2024-05": 7, "2024-06": 19, "2024-07": 16, "2024-08": 15, "2024-09": 24, "2024-10": 16, "2024-11": 15, "2024-12": 16, "2025-01": 28, "2025-02": 25, "2025-03": 35, "2025-04": 31, "2025-05": 43, "2025-06": 52, "2025-07": 80, "2025-08": 88, "2025-09": 95, "2025-10": 53, "2025-11": 95, "2025-12": 55, "2026-01": 56, "2026-02": 105, "2026-03": 152, "2026-04": 373, "2026-05": 946, "2026-06": 1792}}, "brands": {"덴프스": {"posts": 764, "seed": 241, "seed_rate": 31.5, "paid": 34, "avg_foll": 50657, "med_foll": 11023, "sum_likes": 440788, "avg_likes": 737, "sum_comts": 17184, "avg_comts": 22, "sum_views": 6740915, "avg_views": 8893, "med_views": 703, "views_n": 758, "sum_plays": 19973666, "avg_plays": 26560, "avg_dur": 60.9, "verified_rate": 21.3, "grades": {"메가": 1, "매크로": 113, "마이크로": 282, "나노": 223, "나노미만": 145}, "avg_er": 4.62, "med_er": 0.67, "months": {"2021-10": 2, "2021-12": 1, "2022-06": 1, "2022-07": 9, "2023-01": 1, "2023-03": 1, "2023-04": 1, "2023-11": 1, "2024-03": 3, "2024-04": 2, "2024-05": 2, "2024-06": 8, "2024-07": 10, "2024-08": 3, "2024-09": 4, "2024-10": 2, "2024-11": 4, "2024-12": 5, "2025-01": 12, "2025-02": 3, "2025-03": 4, "2025-04": 9, "2025-05": 1, "2025-06": 4, "2025-07": 8, "2025-08": 22, "2025-09": 13, "2025-10": 9, "2025-11": 18, "2025-12": 24, "2026-01": 5, "2026-02": 12, "2026-03": 19, "2026-04": 64, "2026-05": 153, "2026-06": 324}}, "멜라메이트": {"posts": 757, "seed": 186, "seed_rate": 24.6, "paid": 50, "avg_foll": 86862, "med_foll": 15933, "sum_likes": 650991, "avg_likes": 980, "sum_comts": 22126, "avg_comts": 29, "sum_views": 16376105, "avg_views": 21718, "med_views": 1172, "views_n": 754, "sum_plays": 42743999, "avg_plays": 56764, "avg_dur": 49.0, "verified_rate": 26.9, "grades": {"메가": 6, "매크로": 136, "마이크로": 294, "나노": 181, "나노미만": 140}, "avg_er": 7.39, "med_er": 0.74, "months": {"2022-07": 1, "2022-08": 1, "2023-08": 2, "2023-12": 2, "2024-01": 2, "2024-02": 3, "2024-04": 1, "2024-06": 5, "2024-08": 3, "2024-09": 2, "2024-10": 3, "2024-11": 5, "2024-12": 1, "2025-01": 3, "2025-02": 5, "2025-03": 12, "2025-04": 10, "2025-05": 8, "2025-06": 11, "2025-07": 9, "2025-08": 12, "2025-09": 24, "2025-10": 10, "2025-11": 23, "2025-12": 8, "2026-01": 16, "2026-02": 18, "2026-03": 33, "2026-04": 59, "2026-05": 189, "2026-06": 276}}, "오쏘몰": {"posts": 676, "seed": 226, "seed_rate": 33.4, "paid": 29, "avg_foll": 74564, "med_foll": 3613, "sum_likes": 383270, "avg_likes": 696, "sum_comts": 26172, "avg_comts": 38, "sum_views": 8853681, "avg_views": 13194, "med_views": 408, "views_n": 671, "sum_plays": 25971892, "avg_plays": 39232, "avg_dur": 35.4, "verified_rate": 21.7, "grades": {"메가": 10, "매크로": 92, "마이크로": 164, "나노": 205, "나노미만": 205}, "avg_er": 10.65, "med_er": 1.15, "months": {"2021-03": 1, "2021-05": 1, "2021-10": 1, "2022-03": 1, "2022-04": 1, "2022-06": 1, "2022-07": 1, "2022-08": 1, "2022-09": 2, "2022-11": 1, "2023-01": 1, "2023-04": 1, "2023-05": 1, "2023-07": 4, "2023-08": 3, "2023-09": 3, "2023-10": 1, "2023-11": 3, "2023-12": 1, "2024-02": 2, "2024-05": 2, "2024-06": 2, "2024-07": 1, "2024-08": 1, "2024-09": 14, "2024-10": 5, "2024-11": 2, "2024-12": 4, "2025-01": 2, "2025-02": 1, "2025-03": 9, "2025-04": 9, "2025-05": 18, "2025-06": 8, "2025-07": 15, "2025-08": 11, "2025-09": 17, "2025-10": 13, "2025-11": 19, "2025-12": 7, "2026-01": 6, "2026-02": 9, "2026-03": 23, "2026-04": 53, "2026-05": 105, "2026-06": 289}}, "올더베러": {"posts": 618, "seed": 196, "seed_rate": 31.7, "paid": 34, "avg_foll": 114252, "med_foll": 11711, "sum_likes": 209397, "avg_likes": 420, "sum_comts": 34246, "avg_comts": 55, "sum_views": 7473627, "avg_views": 12132, "med_views": 845, "views_n": 616, "sum_plays": 60451075, "avg_plays": 99100, "avg_dur": 32.6, "verified_rate": 23.0, "grades": {"메가": 34, "매크로": 83, "마이크로": 215, "나노": 150, "나노미만": 136}, "avg_er": 5.92, "med_er": 0.78, "months": {"2018-03": 1, "2019-11": 1, "2020-05": 1, "2020-09": 1, "2022-08": 1, "2022-12": 1, "2023-07": 1, "2023-11": 1, "2024-03": 2, "2024-04": 1, "2024-05": 2, "2024-06": 2, "2024-07": 2, "2024-09": 1, "2024-11": 3, "2025-01": 1, "2025-02": 1, "2025-03": 1, "2025-05": 6, "2025-06": 8, "2025-07": 9, "2025-08": 7, "2025-09": 6, "2025-10": 7, "2025-11": 9, "2025-12": 4, "2026-01": 13, "2026-02": 55, "2026-03": 33, "2026-04": 54, "2026-05": 158, "2026-06": 225}}, "지노마스터": {"posts": 730, "seed": 242, "seed_rate": 33.2, "paid": 47, "avg_foll": 78760, "med_foll": 8922, "sum_likes": 330779, "avg_likes": 553, "sum_comts": 10152, "avg_comts": 13, "sum_views": 6645216, "avg_views": 9140, "med_views": 360, "views_n": 727, "sum_plays": 22780250, "avg_plays": 31815, "avg_dur": 41.4, "verified_rate": 23.0, "grades": {"메가": 11, "매크로": 113, "마이크로": 230, "나노": 213, "나노미만": 163}, "avg_er": 61.37, "med_er": 0.56, "months": {"2021-01": 1, "2021-02": 1, "2021-08": 1, "2021-12": 1, "2022-04": 1, "2022-09": 1, "2023-07": 1, "2023-08": 3, "2023-09": 2, "2023-12": 1, "2024-01": 1, "2024-02": 1, "2024-03": 1, "2024-04": 1, "2024-06": 2, "2024-07": 2, "2024-08": 5, "2024-09": 3, "2024-10": 2, "2024-12": 5, "2025-01": 4, "2025-02": 6, "2025-03": 4, "2025-05": 9, "2025-06": 15, "2025-07": 19, "2025-08": 17, "2025-09": 22, "2025-10": 8, "2025-11": 18, "2025-12": 8, "2026-01": 7, "2026-02": 5, "2026-03": 18, "2026-04": 37, "2026-05": 202, "2026-06": 295}}, "푸드올로지": {"posts": 782, "seed": 293, "seed_rate": 37.5, "paid": 96, "avg_foll": 44165, "med_foll": 6359, "sum_likes": 274467, "avg_likes": 433, "sum_comts": 15171, "avg_comts": 19, "sum_views": 6301578, "avg_views": 8089, "med_views": 696, "views_n": 779, "sum_plays": 22720959, "avg_plays": 29546, "avg_dur": 37.3, "verified_rate": 22.9, "grades": {"메가": 4, "매크로": 82, "마이크로": 259, "나노": 258, "나노미만": 179}, "avg_er": 9.78, "med_er": 1.05, "months": {"2022-09": 2, "2024-05": 1, "2024-07": 1, "2024-08": 3, "2024-10": 4, "2024-11": 1, "2024-12": 1, "2025-01": 6, "2025-02": 9, "2025-03": 5, "2025-04": 3, "2025-05": 1, "2025-06": 6, "2025-07": 20, "2025-08": 19, "2025-09": 13, "2025-10": 6, "2025-11": 8, "2025-12": 4, "2026-01": 9, "2026-02": 6, "2026-03": 26, "2026-04": 106, "2026-05": 139, "2026-06": 383}}}, "top_reels": [{"brand": "오쏘몰", "sns": "hafeteria", "name": "하페테리아ㅣ웰니스 라이프스타일", "foll": 118178, "grade": "매크로", "date": "2026-05-29", "dur": 47.633, "likes": 893, "comts": 50, "views": 724941, "plays": 1562924, "url": "https://www.instagram.com/reel/DY6t-_kpLa3/", "caption": "[광고/이벤트⭕️] 정관장에서 작정하고 만든 비타민 활기마이트! 하고싶은 게 많은 예비부부인 저희에게 셀프선물 했어요 🍋  세계적인 유럽 비타민 DSM사의 비타민 B군을 포함한 비타민 10종과 필수 미네랄 3종이 블"}, {"brand": "지노마스터", "sns": "oningoning", "name": "오닝 oning", "foll": 136397, "grade": "매크로", "date": "2026-04-28", "dur": 44.953, "likes": 3163, "comts": 35, "views": 456721, "plays": 1338814, "url": "https://www.instagram.com/reel/DXq7HrfiVNA/", "caption": "어려보이고 싶은 인플루언서(?)의 왓츠인마이백  사실 가방에 2년전 영수증이랑 과자 쓰레기도 있었는데 너무 리얼해서 뺐어요^^;  이렇게 바리바리 들고 다녀도 지갑은 또 안 들고 다니는데..! 지노마스터 포켓몬 카드"}, {"brand": "오쏘몰", "sns": "jinbaekofficial", "name": "백진경 Jin Baek", "foll": 1556206, "grade": "메가", "date": "2025-07-11", "dur": 74.4, "likes": 12368, "comts": 145, "views": 246358, "plays": 1230703, "url": "https://www.instagram.com/reel/DL9io5bM7E-/", "caption": "#광고 친구야, 면역 떨어질 땐 메이드인 절머니🇩🇪  오쏘몰 이뮨으로 건강챙겨 🩷 #오쏘몰 #독일비타민 #국내1위"}, {"brand": "푸드올로지", "sns": "thankyousamuch", "name": "먹샘", "foll": 211170, "grade": "매크로", "date": "2025-12-02", "dur": 38.033, "likes": 7983, "comts": 183, "views": 402932, "plays": 1077830, "url": "https://www.instagram.com/reel/DRwxwBWga3A/", "caption": "후식 진짜 안먹음 #광고 #푸드올로지#애사비탱글젤리 제가 먹은 건 후식 아니고 국내산 사과에서 발효한 애플사이다비니거 6,250mg의 프리미엄 고함량 #애사비 임ㅇㅇ  🍎탱글탱글 상큼달콤한 애사비 젤리 한 포로 입터"}, {"brand": "지노마스터", "sns": "eunjae_zip", "name": null, "foll": 32, "grade": "나노미만", "date": "2026-05-01", "dur": 30.905, "likes": 10729, "comts": 47, "views": 430535, "plays": 895475, "url": "https://www.instagram.com/reel/DXyoIW9TaHm/", "caption": "포켓몬마스터 남자친구를 두면 생기는 일  #포켓몬 #올리브영 #키캡 #올영필수템 #광고아님❌"}, {"brand": "푸드올로지", "sns": "jooshica", "name": "𝕁𝕁", "foll": 2620263, "grade": "메가", "date": "2026-06-11", "dur": 39.5, "likes": 53568, "comts": 169, "views": 369925, "plays": 894053, "url": "https://www.instagram.com/reel/DZcuinBxsUw/", "caption": "this helps so much with my bloating and constipation #korean #cuttingjelly @foodology.global"}, {"brand": "지노마스터", "sns": "guiyong.mag", "name": "귀용 매거진", "foll": 33330, "grade": "마이크로", "date": "2026-04-28", "dur": 41.633, "likes": 960, "comts": 7, "views": 119191, "plays": 782535, "url": "https://www.instagram.com/reel/DXrDrQuifkH/", "caption": "#광고 포켓몬 랜덤깡하구 힐링 루틴 만들어볼래,,?*ೃ♡  혹시 최근에 시험기간이었던 소녀 독자 분들,, 혹은 야근 때문에 밤샘한 직장인 독자 분들 있으신가용,,? 그렇다면 꼬옥 써봐야 할 관리템 추천해드릴게용! ♡"}, {"brand": "지노마스터", "sns": "dear.riev", "name": "리브 Riev", "foll": 47167, "grade": "마이크로", "date": "2025-08-20", "dur": 34.0, "likes": 873, "comts": 17, "views": 53616, "plays": 741582, "url": "https://www.instagram.com/reel/DNkUaVORY3S/", "caption": "#광고  씻어내고 끝나는, 잠깐 안심만 주는 청결제는 이제 그만! 진주보석이랑 천연원료만 담아 안심부터 챙겼어요.  이 제품은 단순한 청결제가 아니라, 사랑하는 아내를 생각하는 마음에서 탄생한 숨펄 산분에센스예요. "}, {"brand": "멜라메이트", "sns": "lee_mido", "name": "이미도", "foll": 716246, "grade": "매크로", "date": "2025-09-01", "dur": 53.153, "likes": 2385, "comts": 42, "views": 113200, "plays": 579495, "url": "https://www.instagram.com/reel/DOClhOHEvE4/", "caption": "#광고 명절 선물 전문 GPT…보고 많이 놀라셨죠? 저두요….🤣🤫 그래도 선물 추천하나는 기막히게 잘하더라구요!!🤖  ✔ 부모님 활력 챙겨주는 👉 한뿌리 흑삼 윤옥고 스틱 ✔ 꿀잠 루틴템 👉 멜라메이트 ✔ 장건강+피"}, {"brand": "멜라메이트", "sns": "chiroro.haru", "name": "하치로 Hachiro", "foll": 149962, "grade": "매크로", "date": "2025-09-11", "dur": 65.4, "likes": 2512, "comts": 202, "views": 226123, "plays": 572306, "url": "https://www.instagram.com/reel/DOdZjYskX6_/", "caption": "📢 다시 돌아온 하치로 X 자연은 더말린  “여유는 잔고에서🪙, 상냥함은 더말린에서?🍑”  그래서 준비했어요!✨ 우리의 상냥 지수🍀를 한껏 올려줄 자연은 더말린 X 하치로 오피스 스티커팩📒  회사 책상에도💼, 노트북"}, {"brand": "올더베러", "sns": "babyaji", "name": "💎 베이비아지 💎", "foll": 301520, "grade": "매크로", "date": "2026-05-19", "dur": 48.622, "likes": 4335, "comts": 70, "views": 48583, "plays": 540323, "url": "https://www.instagram.com/reel/DYhEgRPNlCH/", "caption": "#광고  하루 한 포로  간편하게 시작하는 모닝 루틴! BBLAB 유기농 올리브레몬 듀얼샷!😍 🫒 올레샷 좋은건 알지만 준비과정이 너무 번거로웠는데 🍋 이지컷으로 쉽게 뜯어서 그대로 섭취하니까 설거지도 없고 목 넘김"}, {"brand": "덴프스", "sns": "taesu.01", "name": null, "foll": 123727, "grade": "매크로", "date": "2025-08-30", "dur": 57.566, "likes": 4346, "comts": 60, "views": 275698, "plays": 509860, "url": "https://www.instagram.com/reel/DN9oeACgZOk/", "caption": "#광고 듀오버스터 먹고 썸 시작..? 💕  #듀오버스터 #더블민트볼 #민트볼 #올리브영 #올영세일 #올영픽 #올영추천 #제로슈가"}, {"brand": "멜라메이트", "sns": "euniznue", "name": "김은지", "foll": 60965, "grade": "마이크로", "date": "2026-06-04", "dur": 32.666, "likes": 1431, "comts": 17, "views": 129694, "plays": 499297, "url": "https://www.instagram.com/reel/DZKMzwmvj-M/", "caption": "#광고 파루땅 메이크업 절망편………  돈키호테 가면 쟁여야 할 기초 꿀템 +_+  자연스러운 톤업이랑 피부 진정 필요한 분들은 꼭 사용해 보세요 😻"}, {"brand": "푸드올로지", "sns": "iove_cosmetic", "name": "˗ˋˏ럽코ˎˊ˗", "foll": 40162, "grade": "마이크로", "date": "2025-03-01", "dur": 39.033, "likes": 8687, "comts": 73, "views": 191937, "plays": 488632, "url": "https://www.instagram.com/reel/DGppv9ZS9n5/", "caption": "#광고 아일릿 원희님이 먹는 살 안 찌는 젤리 ASMR로 가져왔어‼ 간식 절대 못 끊을 줄 알았는데ㅠㅠ 요거 먹고 살도 빼고 간식도 끊었다🩷 🎀우리 이제 맛있게 먹으면서 다이어트하자구🎀  ✅올영세일 때 하나씩 겟 하"}, {"brand": "지노마스터", "sns": "vuripull_sm01", "name": "절세미인 정세민", "foll": 67061, "grade": "마이크로", "date": "2026-05-29", "dur": 74.233, "likes": 676, "comts": 86, "views": 145636, "plays": 469482, "url": "https://www.instagram.com/reel/DY775XzTEg0/", "caption": "미인님들 브라질리언 제모에  이렇게 진심일 줄이야... 👀  역시 청결은 삶의 질을 수질 상승 시킨다📈👍  하지만!! 뭐든 겉보다 속 관리가 더 중요한 법!!  와이존 케어도 마찬가지인거 알죠??ㅎㅎ   #광고 제가"}], "seed_month_trend": {"2023-07": {"오쏘몰": 2}, "2023-08": {"멜라메이트": 1, "오쏘몰": 1}, "2023-09": {"오쏘몰": 1}, "2023-10": {"오쏘몰": 1}, "2024-02": {"오쏘몰": 1, "지노마스터": 1}, "2024-04": {"지노마스터": 1}, "2024-06": {"덴프스": 1, "멜라메이트": 1}, "2024-07": {"덴프스": 3, "오쏘몰": 1, "지노마스터": 2, "푸드올로지": 1}, "2024-08": {"덴프스": 1, "멜라메이트": 2, "지노마스터": 5, "푸드올로지": 1}, "2024-09": {"덴프스": 2, "오쏘몰": 9, "지노마스터": 2}, "2024-10": {"덴프스": 1, "오쏘몰": 1, "지노마스터": 2, "푸드올로지": 1}, "2024-11": {"멜라메이트": 1}, "2024-12": {"지노마스터": 5}, "2025-01": {"덴프스": 3, "멜라메이트": 1, "오쏘몰": 1, "지노마스터": 2, "푸드올로지": 2}, "2025-02": {"덴프스": 1, "멜라메이트": 1, "푸드올로지": 7}, "2025-03": {"덴프스": 1, "멜라메이트": 5, "오쏘몰": 8, "푸드올로지": 4}, "2025-04": {"덴프스": 1, "멜라메이트": 3, "오쏘몰": 8, "푸드올로지": 2}, "2025-05": {"덴프스": 1, "멜라메이트": 2, "오쏘몰": 10, "올더베러": 3, "지노마스터": 5, "푸드올로지": 1}, "2025-06": {"덴프스": 1, "멜라메이트": 4, "오쏘몰": 4, "지노마스터": 4, "푸드올로지": 4}, "2025-07": {"덴프스": 1, "멜라메이트": 1, "오쏘몰": 7, "올더베러": 2, "지노마스터": 6, "푸드올로지": 6}, "2025-08": {"덴프스": 11, "멜라메이트": 4, "오쏘몰": 8, "올더베러": 2, "지노마스터": 5, "푸드올로지": 14}, "2025-09": {"덴프스": 7, "멜라메이트": 10, "오쏘몰": 10, "올더베러": 1, "지노마스터": 13, "푸드올로지": 5}, "2025-10": {"덴프스": 3, "멜라메이트": 3, "오쏘몰": 3, "올더베러": 1, "지노마스터": 5, "푸드올로지": 2}, "2025-11": {"덴프스": 7, "멜라메이트": 10, "오쏘몰": 11, "올더베러": 5, "지노마스터": 13}, "2025-12": {"덴프스": 5, "멜라메이트": 5, "오쏘몰": 1, "올더베러": 1, "지노마스터": 5, "푸드올로지": 1}, "2026-01": {"멜라메이트": 7, "오쏘몰": 2, "올더베러": 7, "지노마스터": 3, "푸드올로지": 5}, "2026-02": {"덴프스": 7, "멜라메이트": 9, "오쏘몰": 3, "올더베러": 23, "지노마스터": 2}, "2026-03": {"덴프스": 7, "멜라메이트": 9, "오쏘몰": 9, "올더베러": 7, "지노마스터": 10, "푸드올로지": 6}, "2026-04": {"덴프스": 36, "멜라메이트": 31, "오쏘몰": 28, "올더베러": 17, "지노마스터": 16, "푸드올로지": 58}, "2026-05": {"덴프스": 72, "멜라메이트": 50, "오쏘몰": 48, "올더베러": 65, "지노마스터": 99, "푸드올로지": 59}, "2026-06": {"덴프스": 69, "멜라메이트": 26, "오쏘몰": 48, "올더베러": 62, "지노마스터": 36, "푸드올로지": 114}}, "brand_list": ["덴프스", "멜라메이트", "오쏘몰", "올더베러", "지노마스터", "푸드올로지"], "total_rows": 4327, "total_seed": 1384};
+const COLORS={'멜라메이트':'#e85a8a','오쏘몰':'#9b6dff','올더베러':'#36c6a8','지노마스터':'#7aa8ff','덴프스':'#e8a13c','푸드올로지':'#ff8fb3'};
+const TIERC={'메가':'#e85a8a','매크로':'#9b6dff','마이크로':'#7aa8ff','나노':'#36c6a8','나노미만':'#d8c7df'};
+const fmt=n=>n==null?'-':n.toLocaleString('ko-KR');
+function kn(n){if(n==null)return '-';if(n>=1e8)return (n/1e8).toFixed(n>=1e9?0:2).replace(/\.00$/,'')+'억';if(n>=1e4)return (n/1e4).toFixed(n>=1e5?0:1).replace(/\.0$/,'')+'만';return n.toLocaleString('ko-KR');}
+
+/* KPI */
+const o=D.overall;
+const kpis=[
+  ['분석 브랜드',D.brand_list.length+'개','이너뷰티·웰니스 카테고리'],
+  ['수집 릴스',fmt(o.posts),'중복제거 합집합'],
+  ['시딩 릴스',fmt(o.seed),'평균 시딩률 '+o.seed_rate+'%'],
+  ['누적 재생수',kn(o.sum_plays),'평균 '+fmt(o.avg_plays)+'/릴스'],
+  ['누적 좋아요',kn(o.sum_likes),'평균 '+fmt(o.avg_likes)+'/릴스'],
+  ['평균 영상길이',o.avg_dur+'초','인증계정 비중 '+o.verified_rate+'%'],
+];
+document.getElementById('kpis').innerHTML=kpis.map(k=>`<div class="kpi"><div class="lab">${k[0]}</div><div class="val">${k[1]}</div><div class="sub">${k[2]}</div></div>`).join('');
+
+/* derive rankings */
+const B=D.brand_list.map(b=>({b,...D.brands[b]}));
+const byPlays=[...B].sort((a,c)=>c.avg_plays-a.avg_plays);
+const byER=[...B].sort((a,c)=>c.med_er-a.med_er);
+const bySeed=[...B].sort((a,c)=>c.seed_rate-a.seed_rate);
+const topPlay=byPlays[0], topER=byER[0], topSeed=bySeed[0];
+
+/* verdict */
+document.getElementById('verdict').innerHTML=
+ `평균 재생수(노출 파급력)는 <b>${topPlay.b}</b>가 릴스당 평균 <b>${fmt(topPlay.avg_plays)}회</b>로 가장 높습니다(누적 ${kn(topPlay.sum_plays)}). `+
+ `반면 팔로워 대비 실질 반응(중앙값 ER)은 <b>${topER.b}</b>가 <b>${topER.med_er}%</b>로 가장 높아, "큰 계정 대량 노출형"과 "관여도 높은 소형 계정형" 전략이 갈립니다. `+
+ `시딩 집중도(시딩률)는 <b>${topSeed.b}</b>가 <b>${topSeed.seed_rate}%</b>로 가장 공격적입니다. `+
+ `전 브랜드 합산 협찬 릴스 ${fmt(D.total_seed)}건이 누적 ${kn(o.sum_plays)} 재생을 만들었습니다.`;
+
+/* insight bullets */
+const microShare=Math.round((o.grades['마이크로']+o.grades['나노'])/o.posts*100);
+document.getElementById('pos').innerHTML=[
+ `<b>${topPlay.b}</b> 평균 재생수 ${fmt(topPlay.avg_plays)} — 메가/매크로 활용한 대량 노출이 강점`,
+ `<b>${topER.b}</b> 중앙값 ER ${topER.med_er}% — 팔로워 대비 반응 가장 효율적`,
+ `마이크로+나노 비중 ${microShare}% — 가성비 시딩 풀이 두텁게 형성됨`,
+ `평균 영상길이 ${o.avg_dur}초 — 릴스 정보형 포맷이 정착`,
+].map(t=>`<li>${t}</li>`).join('');
+const lowER=byER[byER.length-1], lowSeed=bySeed[bySeed.length-1];
+document.getElementById('neg').innerHTML=[
+ `<b>${lowER.b}</b> 중앙값 ER ${lowER.med_er}% — 노출 대비 실질 반응 점검 필요`,
+ `조회수(views)는 인스타 정책상 ${(100-Math.round(o.views_n/o.posts*100))}% 가량 미제공 — plays 지표 병행 권장`,
+ `평균 ER은 초소형 계정 이상치로 왜곡(${o.avg_er}%) → 중앙값(${o.med_er}%) 기준 해석 권장`,
+ `<b>${lowSeed.b}</b> 시딩률 ${lowSeed.seed_rate}% — 협찬 노출 비중 상대적으로 낮음`,
+].map(t=>`<li>${t}</li>`).join('');
+
+/* brand table */
+const cols=[
+ ['b','브랜드','s'],['posts','릴스','n'],['seed','시딩','n'],['seed_rate','시딩률%','n'],
+ ['avg_plays','평균재생','n'],['med_views','중앙조회','n'],['avg_likes','평균♥','n'],['avg_comts','평균댓글','n'],
+ ['med_er','중앙ER%','n'],['avg_foll','평균팔로워','n'],['verified_rate','인증%','n'],['avg_dur','길이s','n'],
+];
+document.getElementById('bhead').innerHTML=cols.map((c,i)=>`<th class="sortable" data-k="${c[0]}" data-i="${i}">${c[1]}</th>`).join('');
+let sortK='avg_plays',sortDir=-1;
+function renderBTable(){
+  const rows=[...B].sort((a,c)=>{const x=a[sortK],y=c[sortK];return (x>y?1:x<y?-1:0)*sortDir;});
+  const maxPlay=Math.max(...B.map(r=>r.avg_plays));
+  document.getElementById('bbody').innerHTML=rows.map(r=>{
+    return `<tr>
+      <td class="bn"><span class="chip" style="background:${COLORS[r.b]}"></span>${r.b}</td>
+      <td>${fmt(r.posts)}</td><td>${fmt(r.seed)}</td><td>${r.seed_rate}%</td>
+      <td><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span>${fmt(r.avg_plays)}</span><div class="bar" style="width:70px"><i style="width:${Math.round(r.avg_plays/maxPlay*100)}%"></i></div></div></td>
+      <td>${fmt(r.med_views)}</td><td>${fmt(r.avg_likes)}</td><td>${fmt(r.avg_comts)}</td>
+      <td>${r.med_er}%</td><td>${fmt(r.avg_foll)}</td><td>${r.verified_rate}%</td><td>${r.avg_dur}</td>
+    </tr>`;}).join('');
+}
+document.querySelectorAll('#bhead th').forEach(th=>th.addEventListener('click',()=>{
+  const k=th.dataset.k; if(k==='b')return;
+  if(sortK===k)sortDir*=-1; else{sortK=k;sortDir=-1;} renderBTable();
+}));
+renderBTable();
+
+/* horizontal bar charts */
+function hbar(elId,arr,valFn,labFn,unit){
+  const max=Math.max(...arr.map(valFn));
+  document.getElementById(elId).innerHTML=arr.map(r=>{
+    const v=valFn(r);
+    return `<div class="chart-row"><span class="nm">${r.b}</span>
+      <div class="tr"><i style="width:${Math.round(v/max*100)}%;background:${COLORS[r.b]}"></i></div>
+      <span class="vv">${labFn(v)}${unit||''}</span></div>`;}).join('');
+}
+hbar('chartPlays',byPlays,r=>r.avg_plays,v=>fmt(v));
+hbar('chartSeed',bySeed,r=>r.seed_rate,v=>v,'%');
+hbar('chartER',byER,r=>r.med_er,v=>v,'%');
+
+/* tier stack (overall) */
+const TIERS=['메가','매크로','마이크로','나노','나노미만'];
+const tot=o.posts;
+document.getElementById('tierStack').innerHTML='<div class="stack">'+TIERS.map(t=>
+  `<span title="${t}: ${o.grades[t]} (${(o.grades[t]/tot*100).toFixed(1)}%)" style="width:${o.grades[t]/tot*100}%;background:${TIERC[t]}"></span>`).join('')+'</div>';
+document.getElementById('tierLegend').innerHTML=TIERS.map(t=>
+  `<span><i style="background:${TIERC[t]}"></i>${t} ${o.grades[t]} (${(o.grades[t]/tot*100).toFixed(0)}%)</span>`).join('');
+
+/* monthly seeding spark (from 2023-07) */
+const mt=D.seed_month_trend;
+const months=Object.keys(mt).filter(m=>m>='2023-07').sort();
+const totals=months.map(m=>Object.values(mt[m]).reduce((a,b)=>a+b,0));
+const mmax=Math.max(...totals,1);
+document.getElementById('spark').innerHTML=totals.map((v,i)=>
+  `<i style="height:${Math.max(v/mmax*100,2)}%" title="${months[i]}: ${v}건"></i>`).join('');
+const sx=document.getElementById('sparkx');
+sx.innerHTML=`<span>${months[0]}</span><span>${months[Math.floor(months.length/2)]}</span><span>${months[months.length-1]}</span>`;
+
+/* top reels */
+document.getElementById('tbody').innerHTML=D.top_reels.map(r=>`<tr>
+  <td class="bn"><span class="chip" style="background:${COLORS[r.brand]||'#ccc'}"></span>${r.brand}</td>
+  <td style="text-align:left"><b>${(r.name||r.sns||'').slice(0,18)}</b><br><span class="mut">@${r.sns}</span></td>
+  <td><span class="tag">${r.grade}</span></td>
+  <td>${fmt(r.foll)}</td><td>${r.date}</td><td>${r.dur?r.dur.toFixed(0)+'s':'-'}</td>
+  <td><b>${fmt(r.plays)}</b></td><td>${fmt(r.views)}</td><td>${fmt(r.likes)}</td><td>${fmt(r.comts)}</td>
+  <td class="cap">${(r.caption||'').replace(/[<>&]/g,'')}</td>
+  <td><a href="${r.url}" target="_blank">보기 ↗</a></td>
+</tr>`).join('');
+
+/* footer */
+document.getElementById('foot').innerHTML=
+ `데이터 출처: 업로드 엑셀(종합 시트 ${fmt(D.total_rows)}행 / 시딩 ${fmt(D.total_seed)}건). 미디어유형 clips(릴스) 중심. `+
+ `조회수 -1(API 미제공) 및 음수/결측은 집계 제외. 인게이지먼트율=(좋아요+댓글)/팔로워×100. `+
+ `재생수(plays)는 인스타 릴스 노출 지표, 조회수(views)는 일부만 제공되어 중앙값으로 표기. `+
+ `· 본 대시보드는 이너뷰티·웰니스 카테고리 레퍼런스를 뷰티 캠페인 시딩 설계에 활용하기 위한 자동 집계본입니다.`;
+</script>
+</body>
+</html>
