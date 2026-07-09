@@ -68,11 +68,35 @@ python scripts/pipeline_3_build.py            # 대시보드 생성
 1. 로컬(또는 `qoo10.jp` 가 허용된 환경)에서 크롤러 실행 → `review_result.csv` 생성
    ```bash
    pip install requests beautifulsoup4
-   # 상품 gd_no 들을 지정 (번역 원하면 --translate + GEMINI_API_KEY)
+
+   # 상품 gd_no 직접 지정 (번역: --translate + GEMINI_API_KEY 환경변수)
    python scripts/qoo10_crawler_standalone.py \
        --product 1057459512 --product 1135003693 --product 1036494829 \
        --out data/review_result.csv --translate
+
+   # 검색어로 상품 자동 탐색 + 번역
+   python scripts/qoo10_crawler_standalone.py \
+       --search "colorgram ティント" --out data/review_result.csv --translate
+
+   # 이어서 크롤링 (기존 CSV에 신규 리뷰만 추가)
+   python scripts/qoo10_crawler_standalone.py \
+       --product 1057459512 --out data/review_result.csv --resume --translate
    ```
+
+   | 주요 옵션 | 설명 | 기본값 |
+   |---|---|---|
+   | `--product <gd_no\|URL>` | 상품 ID 또는 URL (반복 지정 가능) | |
+   | `--search <키워드>` | 검색어로 상품 자동 탐색 | |
+   | `--search-pages N` | 검색 페이지 수 | 3 |
+   | `--out <경로>` | 출력 CSV 경로 | `data/review_result.csv` |
+   | `--resume` | 기존 CSV에 신규 리뷰만 추가 (중복 건너뜀) | |
+   | `--translate` | Gemini로 일→한 번역 | |
+   | `--translate-threads N` | 번역 병렬 스레드 수 | 80 |
+   | `--model <모델ID>` | Gemini 모델 | `gemini-2.5-flash` |
+   | `--max-pages N` | 상품당 최대 수집 페이지 | 50 |
+   | `--page-size N` | 페이지당 리뷰 수 | 500 |
+   | `--sleep N` | 페이지 간 대기(초) | 0.6 |
+
 2. 생성된 `review_result.csv` 를 `index.html` 화면의 업로드 영역에 **드래그&드롭**
 3. KPI · 차트 · 인사이트 결론이 실데이터로 즉시 갱신됩니다.
    (모든 처리는 브라우저 안에서만 수행되며 외부 서버로 전송되지 않습니다.)
